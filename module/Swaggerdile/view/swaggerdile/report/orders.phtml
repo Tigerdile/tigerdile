@@ -1,0 +1,93 @@
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/dashboard/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <h3><?= $this->translate('Generate a report for...') ?></h3>
+        <form method="post">
+            <div class="form-group">
+                <select name="month">
+                    <option value=""><?= $this->translate('Month') ?></option>
+                    <?php for($i = 1; $i < 13; $i++) : ?>
+                        <option value="<?=$i ?>" <?= $i == $month ? 'selected' : '' ?>><?=$i ?></option>
+                    <?php endfor ?>
+                </select> / 
+                <?php
+                    $thisYear = date('Y');
+                ?>
+                <select name="year">
+                    <option value=""><?= $this->translate('Year') ?></option>
+                    <?php for($i = 2016; $i <= $thisYear; $i++) : ?>
+                        <option value="<?=$i ?>" <?= $i == $year ? 'selected' : '' ?>><?=$i ?></option>
+                    <?php endfor ?>
+                </select>
+                <input type="submit" name="act" value="<?= $this->translate('Display Report') ?>" />
+                <?= $this->translate('or') ?>
+                <input type="submit" name="act" value="<?= $this->translate('Download') ?>" />
+            </div>
+            <div class="form-group">
+                <?= $this->translate('Note: downloading will INCLUDE your customer\'s address information, if provided, for the purposes of sending physical goods.'); ?>
+            </div>
+        </form>
+
+        <?php if($report == false) : ?>
+            <h3><?= $this->translate('Pick a month and year above to generate a report.') ?></h3>
+        <?php elseif(!count($report)) : ?>
+            <h3><?= $this->translate('You have no orders for the selected time period.') ?></h3>
+        <?php else:
+            $curTier = -1;
+
+            foreach($report as $line) :
+                if($curTier != $line->getTierId()) :
+                    if($curTier != -1) : ?>
+                        </tbody></table></div></div>
+                    <?php endif ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <?php if($line->getTierId()) : ?>
+                                    <?= $line->getTitle() ?>
+                                <?php else: ?>
+                                    <?= $this->translate('Users Without a Selected Tier') ?>
+                                <?php endif ?>
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th><?= $this->translate('User') ?></th>
+                                        <th><?= $this->translate('Email') ?></th>
+                                        <th><?= $this->translate('Pledge') ?></th>
+                                        <th><?= $this->translate('Paid') ?></th>
+                                        <th><?= $this->translate('Total<br/>To<br/>Date') ?></th>
+                                        <th><?= $this->translate('Historical<br/>Access' ) ?></th>
+                                        <th><?= $this->translate('Joined') ?></th>
+                                        <th><?= $this->translate('Billed') ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                <?php $curTier = $line->getTierId(); endif; ?>
+                <tr>
+                    <td><?= htmlentities($line->getDisplayName()) ?></td>
+                    <td><?= htmlentities($line->getUserEmail()) ?></td>
+                    <td><?= number_format($line->getTierPrice() + $line->getExtraPrice(), 2) ?></td>
+                    <td><?php if($line->getIsProrate()): ?>
+                        <?= number_format($line->getTotalPrice(), 2) ?>
+                        <?php else: ?>
+                        <?= number_format($line->getTierPrice() + $line->getExtraPrice()
+                                            + $line->getHistoricalPrice(), 2) ?>
+                        <?php endif ?></td>
+                    <td><?= number_format($line->getTotalPaid(), 2) ?></td>
+                    <td><?= $line->getIsHistoricalPaid() ? 'Yes' : 'No' ?></td>
+                    <td><?= date('Y-m-d', strtotime($line->getCreated())) ?></td>
+                    <td><?= date('Y-m-d', strtotime($line->getCompleted())) ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody></table></div></div>
+        <?php endif ?>
+    </div>
+</div>

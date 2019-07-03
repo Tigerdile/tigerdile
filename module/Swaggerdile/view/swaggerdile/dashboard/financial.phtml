@@ -1,0 +1,333 @@
+<?php
+    $citizenSetting = 0;
+
+    if(array_key_exists('is_us_citizen', $meta)) {
+        $citizenSetting = (int)$meta['is_us_citizen'];
+    }
+
+?><div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/dashboard/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <?php if(count($messages)) : ?>
+            <div class="jumbotron">
+                <ul>
+                    <?php foreach($messages as $message): ?>
+                        <li><?= $message ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+        <?php endif ?>
+        <form method="post" id="manageForm" enctype="multipart/form-data">
+        <?php if(array_key_exists('has_legal_docs', $meta)):
+            $hasSurepayInfo = (strlen($wfFirstname) &&
+                               strlen($wfLastname) &&
+                               strlen($wfEmail));
+
+            $paypalEmail = array_key_exists('paypal_email', $meta) ? $meta['paypal_email'] : '';
+
+            ?>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><?= $this->translate('Payout') ?></h3>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <?= $this->translate('Your current balance is:') ?>
+                        <strong>$<?= number_format($currentBalance, 2) ?></strong>
+                    </p>
+                    <br />
+                    <p>
+                        Payouts are processed as fast as possible.  Most payouts will be processed within
+                        2 business days, but some cases may take as many as 5.  There isn't much we can
+                        do about this as it is the banks holding the money, not us.
+                    </p>
+                    
+                    <?php if(!strlen($paypalEmail) && !$hasSurepayInfo) : ?>
+                        <h3><?= $this->translate('You must configure a payout method below before you can receive money.') ?></h3>
+                    <?php else: ?>
+                        <br />
+                        <p class="text-center">
+                            Pay <input type="text" name="sendAmount" value="<?= $currentBalance ?>" /> USD
+                            <br /><br />
+                            <?php if($hasSurepayInfo) : ?>
+                                <input class="btn btn-large btn-success" type="submit" name="act" value="<?= $this->translate('Payout Via WF SurePay') ?>" />
+                                <br /><br />
+                            <?php endif ?>
+                            <?php if(strlen($paypalEmail)) : ?>
+                                <input class="btn btn-large btn-success" type="submit" name="act" value="<?= $this->translate('Payout Via PayPal') ?>" />
+                                to
+                                <input type="input" name="sendToPaypal" value="<?= htmlentities($paypalEmail) ?>" />
+                            <?php endif ?>
+                        </p>
+                    <?php endif ?>
+                </div>
+            </div>
+            <div class="show-us show-not-us panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Payout Methods</h3>
+                </div>
+                <div class="panel-heading show-us">
+                    <h4 class="panel-title">Payout via Wells Fargo SurePay</h4>
+                </div>
+                <div class="panel-body show-us">
+                    <p>
+                        We can send money directly to your bank account with
+                        no additional charge!
+                        This is only available to our US customers, and we do it
+                        via Wells Fargo SurePay.  You do not have to have a Wells
+                        Fargo bank account in order to use SurePay.
+                    </p>
+                    <div class="form-group">
+                        <label for="wf_firstname">Your first name</label>
+                        <input type="text" class="form-control" name="wf_firstname" value="<?= htmlentities($wfFirstname) ?>" />
+                    </div>
+                    <div class="form-group">
+                        <label for="wf_lastname">Your last name</label>
+                        <input type="text" class="form-control" name="wf_lastname" value="<?= htmlentities($wfLastname) ?>" />
+                    </div>
+                    <div class="form-group">
+                        <label for="wf_email">Your email to use with SurePay</label>
+                        <input type="text" class="form-control" name="wf_email" value="<?= htmlentities($wfEmail) ?>" />
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" name="act" value="Save" />
+                    </div>
+                </div>
+                <div class="panel-heading show-us show-not-us">
+                    <h4 class="panel-title">Payout via PayPal</h4>
+                </div>
+                <div class="panel-body show-us show-not-us">
+                    <p>
+                        We can send you money via PayPal regardless of what
+                        country you are in.  You will have to pay PayPal's
+                        fee.
+                    </p>
+                    <div class="form-group">
+                        <label for="paypal_email">Enter Your PayPal Email to use PayPal</label>
+                        <input type="text" class="form-control" name="paypal_email" value="<?= htmlentities($paypalEmail) ?>" />
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" name="act" value="Save" />
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+            <h3>When does Swaggerdile Pay Out?</h3>
+            <p>
+                When you ask us to!  But first, you need to fill out some paperwork.
+                This is standard stuff and is required because we are collecting
+                money on your behalf.
+            </p>
+            <p>
+                <strong>
+                    We will NOT send a payout until we have received all legal documents
+                    from you!  Them's the rules, sorry!
+                </strong>
+            </p>
+        <?php endif ?>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Nationality</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="is_us_citizen">Are you a US Citizen?</label>
+                        <select id="is_us_citizen" class="form-control" name="is_us_citizen">
+                            <option value="0" <?= (!$citizenSetting) ? 'SELECTED' : '' ?>>Pick One</option>
+                            <option value="1" <?= ($citizenSetting == 1) ? 'SELECTED' : '' ?>>Yes, I am a US Citizen</option>
+                            <option value="2" <?= ($citizenSetting == 2) ? 'SELECTED' : '' ?>>No, I am not a US Citizen</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default show-us show-not-us">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Documents</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="show-us">
+                        <?php if(array_key_exists('has_legal_docs', $meta)): ?>
+                            <p>
+                                You've already submitted your paperwork, but you can update
+                                it if you need to.
+                            </p>
+                        <?php else: ?>
+                            <p>
+                                Before we can pay you, we must collect a W-9 form.
+                                These forms are encrypted and stored on a secure
+                                server separate from our web server and very locked
+                                down.  The key required to decrypt the forms is
+                                stored on a third machine separate from the other
+                                two.
+                            </p>
+                        <?php endif?>
+                        <BR />
+                        <p>
+                            <a href="https://www.irs.gov/pub/irs-pdf/fw9.pdf"
+                             target="_blank">CLICK HERE TO GET THE FORM
+                             STRAIGHT FROM THE IRS!</a>
+                        </p>
+                        <BR />
+                        <p>
+                            You can fill it out using PDF software, such
+                            as Adobe Acrobat Reader, SignPDF, etc. and then
+                            upload here.
+                        </p>
+                        <BR />
+                    </div>
+                    <div class="show-not-us">
+                        <?php if(array_key_exists('has_legal_docs', $meta)): ?>
+                            <p>
+                                You've already submitted your paperwork, but you can update
+                                it if you need to.
+                            </p>
+                        <?php else: ?>
+                            <p>
+                                Before we can pay you, we must collect either
+                                a W8-BEN (individual) or a W-8BENE (corporate) form.
+                                These forms are encrypted and stored on a secure
+                                server separate from our web server and very locked
+                                down.  The key required to decrypt the forms is
+                                stored on a third machine separate from the other
+                                two.
+                            </p>
+                        <?php endif ?>
+                        <BR />
+                        <p>
+                            <a href="https://www.irs.gov/pub/irs-pdf/fw8ben.pdf"
+                             target="_blank">CLICK HERE IF YOU ARE **NOT** A
+                             CORPORATION TO GET THE FORM STRAIGHT FROM THE IRS</a>
+                        </p>
+                        <BR />
+                        <p>
+                            <a href="https://www.irs.gov/pub/irs-pdf/fw8bene.pdf"
+                             target="_blank">CLICK HERE IF YOU **ARE** A
+                             CORPORATION TO GET THE FORM STRAIGHT FROM THE IRS</a>
+                        </p>
+                        <BR />
+                        <p>
+                            You can fill it out using PDF software, such
+                            as Adobe Acrobat Reader, SignPDF, etc. and then
+                            upload here.
+                        </p>
+                        <BR />
+                    </div>
+                    <div class="form-group show-not-us show-us">
+                        <label for="upload_document">Upload your form here</label>
+                        <input name="upload_document" type="file" />
+                    </div>
+                    <div class="form-group show-not-us show-us">
+                        <input type="submit" name="act" value="Save" />
+                    </div>
+                </div>
+            </div>
+            <?php if(!($numItems = count($sheet))): ?>
+                <h3>You have no transactions to list yet.</h3>
+            <?php else: ?>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Balance Sheet</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Created</th>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                    <th>Amount</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php for($i = 0; ($i < $numItems) && ($i < 60); $i++) :
+                                        $row = $sheet[$i]; ?>
+                                    <tr>
+                                        <td><?= date('m/d/Y H:i:s', strtotime($row->getCreated())) ?></td>
+                                        <td><?= $row->getTransactionType($row->getTypeId()) ?></td>
+                                        <td><?= $row->getNotes() ?></td>
+                                        <td>$<?= number_format($row->getTransaction(), 2) ?></td>
+                                        <td>$<?= number_format($row->getBalance(), 2) ?></td>
+                                    </tr>
+                                <?php endfor ?>
+                            </tbody>
+                        </table>
+                        <div class="text-center">
+                              <?php if($page != 0) : ?>
+                                <a class="btn btn-success btn-lg" href="<?= $this->url('dashboard-financial') ?>?p=<?= $page-1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>">&laquo; Previous</a>
+                              <?php endif ?>
+                              <?php if($numItems > $pageSize) : ?>
+                                <a class="btn btn-success btn-lg" href="<?= $this->url('dashboard-financial') ?>?p=<?= $page+1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>">Next &raquo;</a>
+                              <?php endif ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif ?>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<?php
+    $this->inlineScript()->captureStart(); ?>
+
+    var handled_bank = false;
+
+    jQuery(document).ready(function() {
+        jQuery('#is_us_citizen').change(function() {
+            var val = jQuery(this).val();
+
+            jQuery('.show-us,.show-not-us').hide();
+
+            if(val == "1") {
+                jQuery('.show-us').show();
+            } else if(val == "2"){
+                jQuery('.show-not-us').show();
+            }
+        });
+
+        Stripe.setPublishableKey('<?= $this->stripePublishKey ?>');
+
+        // Bind on the submit.
+        jQuery('#manageForm').submit(function(ev) {
+            // Only do this if bank account value is set
+            // And we're in US mode
+            if((!handled_bank) && (jQuery('#is_us_citizen').val() == "1") &&
+                jQuery('input[name="bank_full_name"]').val().length &&
+                jQuery('input[name="bank_account_number"]').val().length) {
+                ev.preventDefault();
+
+                Stripe.bankAccount.createToken({
+                    country: 'US',
+                    currency: 'USD',
+                    routing_number: jQuery('input[name="bank_routing_number"]').val(),
+                    account_number: jQuery('input[name="bank_account_number"]').val(),
+                    name: jQuery('input[name="bank_full_name"]').val(),
+                    account_holder_type: jQuery('select[name="bank_account_type"]').val()
+                }, function(status, response) {
+                    if(response.error) {
+                        alert(response.error.message);
+                    } else {
+                        var token = response.id;
+                        var form = jQuery('#manageForm');
+                        form.append('<input type="hidden" name="stripeToken" value="' + token + '" />');
+                        jQuery('input[name="bank_routing_number"]').val('');
+                        jQuery('input[name="bank_account_number"]').val('');
+                        handled_bank = true;
+                        form.submit();
+                    }
+                });
+
+                return false;
+            }
+
+            return true;
+        });
+
+        jQuery('#is_us_citizen').change();
+    });
+<?php $this->inlineScript()->captureEnd(); ?>

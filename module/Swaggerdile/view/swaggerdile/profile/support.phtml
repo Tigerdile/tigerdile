@@ -1,0 +1,205 @@
+<?php if(!is_object($user)) : ?>
+    <div class="jumbotron">
+        <p class="text-center">Before you continue, you need to either
+            <a href="<?= $this->url('login') ?>?return=<?= urlencode($this->url('profile-support', array('profile' => $profile->getUrl()))) ?>">Login</a>
+            or
+            <a href="<?= $this->url('signup') ?>?return=<?= urlencode($this->url('profile-support', array('profile' => $profile->getUrl()))) ?>">Sign Up</a>
+        </p>
+        <p class="text-center">Don't worry, we'll return you right back here when you are done.</p>
+    </div>
+<?php elseif($user->getId() == $profile->getOwnerId()) : ?>
+    <div class="jumbotron">
+        Little full of ourselves, are we?  You can't support yourself.
+        Sorry!
+    </div>
+<?php else :
+    // Set up error attributes
+    $errorClasses = 'bg-danger text-danger no-bullets';
+    $this->getHelperPluginManager()->get('FormElementErrors')
+         ->setAttributes(array('class' => $errorClasses));
+
+    $form->prepare();
+
+    echo $this->form()->openTag($form);
+?>
+    <?php if($this->message) : ?>
+        <div class="jumbotron text-center">
+            <h4 class="text-danger"><?= $this->message; ?></h4>
+        </div>
+    <?php elseif(count($form->getMessages())): ?>
+        <div class="jumbotron text-center">
+            <h4 class="text-danger"><?= $this->translate("There's some errors you need to fix below!") ?></h4>
+        </div>
+    <?php endif ?>
+
+    <?php if($subscriber && $subscriber->getIsActive() && 
+             (!(int)$subscriber->getChildPaymentMethodId())) : ?>
+        <div class="jumbotron text-center">
+            <h2 class="text-center">You are no longer subscribed to this profile.</h2>
+            <p class="text-center">You won't be billed, but you'll still have access until the time you
+               have paid for has run out.</p>
+            <p class="text-center">You may, if you want, support them again by selecting
+                                   options below.</p>
+        </div>
+    <?php elseif(!$isDecline): ?>
+        <div class="jumbotron text-center">
+            <h2><?= $this->translate('Awesome!') ?>
+            <br /><?= sprintf($this->translate('You want to support &quot;%s&quot;!'), htmlentities($profile->getTitle())) ?>
+            <br /><?= $this->translate('Review your options below.') ?></h2>
+            <?php switch($profile->getPaymentTypeId()): // switch is twitchy
+                case 1: ?>
+                    <p><?= $this->translate("You will be charged a partial fee to pay for immediate access for the rest of the month, and then a full fee starting on the first day of next month.") ?></p>
+                <?php break; case 2: ?>
+                    <p><?= $this->translate("You will not be charged anything right now.  Your first payment will be charged on the first of next month.") ?></p>
+                <?php break; case 3: ?>
+                    <p><?= $this->translate("You will pay the full price for access now, and then pay again on the first of next month.") ?></p>
+                <?php break; case 4: ?>
+                    <p><?= $this->translate("You will pay the full price for access now, but you get to skip the first month's billing.") ?></p>
+                <?php break; default: ?>
+            <?php endswitch; ?>
+        </div>
+    <?php else: ?>
+        <div class="jumbotron text-center">
+            <h2><?= $this->translate('Your payment was declined!') ?></h2>
+            <h3><?= $this->translate("Please select your desired tier level below, and then on the
+                next screen you will be able to pay and receive access to your
+                content once more!"); ?></h3>
+        </div>
+    <?php endif ?>
+    <div class="jumbotron">
+    <?php if($subscriber && $subscriber->getIsActive() && 
+             ((int)$subscriber->getChildPaymentMethodId())) : ?>
+        <h2 class="text-center"><?= $this->translate('If you want to cancel...') ?></h2>
+        <p class="text-center"><input type="submit" name="act" class="btn btn-success btn-lg" value="<?= $this->translate('Unsubscribe') ?>" /></p>
+        <p class="text-center"><small><?= $this->translate("You'll still be able to access your content until the next time we try to bill!") ?></small></p>
+        <h2 class="text-center"><?= $this->translate('- OR -') ?></h2>
+    <?php
+        endif;
+
+        $tiers = $profile->getTiers();
+
+        if(count($tiers)) : ?>
+            <h2 class="text-center"><?= $this->translate('Pick your Reward Tier!') ?></h2>
+            <h3 class="text-center"><?= $this->translate("This is optional, but you're probably missing out if you don't pick one.") ?></h3>
+            <?php foreach($tiers as $tier) :
+                $available = $tier->getAvailability();
+
+                if(($available !== false) && ($available <= 0)) {
+                    continue;
+                }
+             ?>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><?= htmlentities($tier->getTitle()) ?></h3>
+                    </div>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td width="20"><input needsaddress="<?= $tier->getIsShippable() ? '1' : '0' ?>" type="radio" name="tierId" value="<?= $tier->getId() ?>" <?= $tier->getId() == $form->get('tierId')->getValue() ? 'CHECKED' : '' ?>></td>
+                                <td width="80">$<?= number_format($tier->getPrice(), 2) ?></td>
+                                <td>
+                                    <?= $tier->getContent() ?>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endforeach ?>
+            <div class="form-group">
+                <label for="extra"><?= $form->get('extra')->getOption('label') ?></label>
+                <?= $this->FormElement($form->get('extra')->setAttribute('class', 'form-control')) ?>
+                <?php if(count($form->get('extra')->getMessages())): ?>
+                    <ul class="<?= $errorClasses ?>">
+                        <li><?= $this->translate("This needs to be either left blank, or just a number no symbols in it such as: 10.00") ?></li>
+                    </ul>
+                <?php endif ?>
+            </div>
+        <?php else : ?>
+            <div class="form-group">
+                <label for="extra">This profile does not provide different tier levels of sponsorship, so you may choose however much you wish to contribute each month.</label>
+                <?= $this->FormElement($form->get('extra')->setAttribute('class', 'form-control')) ?>
+                <?php if(count($form->get('extra')->getMessages())): ?>
+                    <ul class="<?= $errorClasses ?>">
+                        <li><?= $this->translate("This needs to be either left blank, or just a number no symbols in it such as: 10.00") ?></li>
+                    </ul>
+                <?php endif ?>
+            </div>
+        <?php endif ?>
+        <?php if(($profile->getHistoricalFee() > 0) && $form->has('payHistorical')) : ?>
+            <div class="form-group">
+                <label for="payHistorical">
+                    When you pay your support dues, you are entitled to see all
+                    submissions that are posted from the point you join.
+                    However, if you want to see
+                    material that was posted prior to your subscription, you will
+                    need to pay a "Historical Content Fee" of
+                    <strong>$<?= number_format($profile->getHistoricalFee(),2) ?></strong>. 
+                    If you'd like to pay that fee, pick yes here.
+                </label>
+                <?= $this->FormElement($form->get('payHistorical')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($form->get('payHistorical')); ?>
+            </div>
+        <?php endif ?>
+        
+        <h3 class="address-required">The tier level you have selected requires a shipping address.  Please provide it below!</h3>
+        <?php
+            $addressForm = $form->get('address');
+        ?>
+        <div class="form-group address-required">
+            <label for="ship_to_name"><?= $addressForm->get('ship_to_name')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('ship_to_name')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('ship_to_name')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="address1"><?= $addressForm->get('address1')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('address1')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('address1')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="address2"><?= $addressForm->get('address2')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('address2')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('address2')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="city"><?= $addressForm->get('city')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('city')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('city')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="state"><?= $addressForm->get('state')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('state')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('state')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="postal_code"><?= $addressForm->get('postal_code')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('postal_code')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('postal_code')) ?>
+        </div>
+        <div class="form-group address-required">
+            <label for="country"><?= $addressForm->get('country')->getOption('label') ?></label>
+            <?= $this->FormElement($addressForm->get('country')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($addressForm->get('country')) ?>
+        </div>
+        <div class="text-center">
+            <input type="submit" name="act" class="btn btn-success btn-lg" value="<?= $this->translate('Complete Checkout') ?>" />
+        </div>
+    </div>
+</form>
+<?php $this->inlineScript()->captureStart(); ?>
+jQuery(document).ready(function() {
+    jQuery('input[name="tierId"]').click(function() {
+        var needsAddress = parseInt(jQuery(this).attr('needsaddress'));
+
+        if(!needsAddress) {
+            jQuery('.address-required').hide();
+        } else {
+            jQuery('.address-required').show();
+        }
+    });
+
+    jQuery('.address-required').hide();
+    jQuery('input[name="tierId"]:checked').click();
+});
+<?php $this->inlineScript()->captureEnd(); ?>
+
+<?php endif ?>

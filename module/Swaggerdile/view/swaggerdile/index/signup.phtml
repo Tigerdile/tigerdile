@@ -1,0 +1,61 @@
+<?php if(!empty($this->messages)) : ?>
+    <div class="jumbotron text-center">
+        <?php foreach($this->messages as $message) : ?>
+            <p style="color: red;"><?= $message ?></p>
+        <?php endforeach ?>
+    </div>
+<?php endif ?>
+  
+
+<div class="jumbotron">
+<?php
+    $form = $this->form;
+    $form->prepare();
+
+    // Configure form
+    $form->setAttribute('action', $this->url('signup'));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('role', 'form');
+
+    echo $this->form()->openTag($form);
+?>
+    <?php if($returnUrl) : ?>
+        <input type="hidden" name="return" value="<?= $returnUrl ?>" />
+    <?php endif ?>
+    <p>Tigerdile does not share or sell your personal information, ever.
+       In fact, we try to collect as little as possible about you.</p>
+
+    <div class="form-group">
+        <label for="username"><?= $form->get('username')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('username')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('username')); ?>
+    </div>
+    <div class="form-group">
+        <label for="email"><?= $form->get('email')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('email')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('email')); ?>
+    </div>
+    <div class="form-group">
+        <label for="password"><?= $form->get('password')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('password')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('password')); ?>
+    </div>
+    <div class="form-group">
+        <label for="confirmpassword"><?= $form->get('confirmpassword')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('confirmpassword')->setAttribute('class', 'form-control')) ?>
+    </div>
+    <div class="form-group">
+        <label for="verify"><?= $form->get('verify')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('verify')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('verify')) ?>
+    </div>
+    <?= $this->formElement($form->get('act')->setAttribute('class', 'btn btn-default')) ?>
+
+    <?= $this->form()->closeTag() ?>
+    <p>&nbsp;</p>
+    <p><i>Tigerdile <strong>does not pay bug bounties</strong>.
+          If you're here just to scan Tigerdile for OWASP items in the
+          hope of making a buck, please just move along.  If you're an
+          actual user who finds a bug, we're happy to hear about them!
+          Use our Support link in the header.</i></p>
+</div>

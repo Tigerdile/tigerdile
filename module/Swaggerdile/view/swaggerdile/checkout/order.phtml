@@ -1,0 +1,79 @@
+<?php if(count($messages)) : ?>
+  <div class="jumbotron">
+    <?php foreach($messages as $message): ?>
+      <p><?= $message ?></p>
+    <?php endforeach ?>
+  </div>
+<?php endif ?>
+<form method="post">
+  <div class="jumbotron">
+    <h3>Pick a Profile</h3>
+    <hr />
+    <?php if(!count($profiles)): ?>
+      <p>You're not a Tigerdile streamer it looks like.  But if you want
+         to buy for your friend, that's cool.  Type in their username
+         below.
+      </p>
+    <?php else: ?>
+      <p>You're probably ordering for yourself, but if you're not,
+         you can put another user's name in here.  If you want one
+         of your supporters to pay for you, just give them a link
+         to this page and tell them to put in your user name!
+      </p>
+    <?php endif ?>
+    <div class="form-group">
+      <label for="username">User you're buying for</label>
+      <input class="form-control" name="username" value="<?= htmlentities($username) ?>" />
+    </div>
+    <hr />
+    <h3>Pick Your Stream Level</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td><input type="radio" name="level" value="1" <?= $level == 1 ? 'checked' : '' ?> /></td>
+          <td>
+            <p>
+            <strong>$5 - 10 viewer stream.</strong>  This limit is a "soft" limit; if you go over
+            occasionally, we don't mind, and viewers are never blocked from your
+            stream.  We trust you!
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="radio" name="level" value="2" <?= $level == 2 ? 'checked' : '' ?> /></td>
+          <td>
+            <p>
+            <strong>$10 - Unlimited viewers!</strong>  This is our standard package and is
+            our recommended option for people who make money doing art.
+            Tigerdile is a small site that costs a lot to run, so it means
+            a lot when you give us this much.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="radio" name="level" value="3" <?= $level == 3 ? 'checked' : '' ?> /></td>
+          <td>
+            <p>
+            <strong>$40 - Wow!  VIP Level Support!</strong>  You're really helping us out.  You get some perks:
+              <ul>
+                <li>An ad on the front page of Tigerdile</li>
+                <li>You can have an image in place of your stream description
+                    on the stream list to get extra attention!
+                </li>
+                <li>Your stream gets listed at the top of the page with
+                    other VIP folks.
+                </li>
+                <li>We'll also send you a Tigerdile Tadpole plushie or 
+                    Tigerdile Tote-Bag the first time you pay at this level.
+                </li>
+              </ul>
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-center">
+      <input type="submit" name="act" class="btn btn-lg btn-default" value="Continue to Checkout" />
+    </p>
+  </div>
+</form>

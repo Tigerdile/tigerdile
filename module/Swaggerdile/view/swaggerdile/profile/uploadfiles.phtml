@@ -1,0 +1,11 @@
+<?php if(!count($newFiles)) : ?>
+    <div class="panel panel-default">
+        <div class="panel-body text-danger">
+            Got an upload request with no files to upload -- Strange?
+        </div>
+    </div>
+<?php else :
+    foreach($newFiles as $item) : ?>
+    <?= $this->partial('swaggerdile/profile/partial-file-row.phtml', array('item' => $item, 'profile' => $profile, 'path' => $path, 'isOwner' => true)) ?>
+    <?php endforeach;
+endif ?>

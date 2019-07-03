@@ -1,0 +1,21 @@
+<?php
+    $thisOne = uniqid();
+
+    if(!isset($dataParent)) {
+        $dataParent = 'accordion';
+    }
+?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="heading<?= $thisOne ?>">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#<?= $dataParent?>" href="#collapse<?= $thisOne ?>" aria-expanded="false" aria-controls="collapse<?= $thisOne ?>">
+          <?= $title ?>
+        </a>
+      </h4>
+    </div>
+    <div id="collapse<?= $thisOne ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?= $thisOne ?>">
+      <div class="panel-body">
+        <?= $body ?>
+      </div>
+    </div>
+  </div>

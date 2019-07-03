@@ -1,0 +1,41 @@
+<?php if(!empty($this->messages)) : ?>
+    <div class="jumbotron text-center">
+        <?php foreach($this->messages as $message) : ?>
+            <p style="color: red;"><?= $message ?></p>
+        <?php endforeach ?>
+    </div>
+<?php endif ?>
+  
+
+<div class="jumbotron">
+<?php
+    $form = $this->form;
+    $form->prepare();
+
+    // Configure form
+    $form->setAttribute('action', $this->url('login'));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('role', 'form');
+
+    echo $this->form()->openTag($form);
+?>
+    <?php if($returnUrl) : ?>
+        <input type="hidden" name="return" value="<?= $returnUrl ?>" />
+    <?php endif ?>
+
+    <div class="form-group">
+        <label for="login"><?= $form->get('login')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('login')->setAttribute('class', 'form-control')) ?>
+    </div>
+    <div class="form-group">
+        <label for="password"><?= $form->get('password')->getOption('label') ?></label>
+        <?= $this->formElement($form->get('password')->setAttribute('class', 'form-control')) ?>
+    </div>
+    <?= $this->formElement($form->get('act')->setAttribute('class', 'btn btn-default')) ?>
+
+    <?= $this->form()->closeTag() ?>
+    <p>&nbsp;</p>
+    <p><a href="<?= $this->url('signup') ?>">Sign Up</a> or
+       <a href="<?= $this->url('forgot-password') ?>">Reset Password</a>
+    </p>
+</div>

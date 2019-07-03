@@ -1,0 +1,31 @@
+{
+    "name": "zendframework/skeleton-application",
+    "description": "Skeleton Application for ZF2",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "framework",
+        "zf2"
+    ],
+    "homepage": "http://framework.zend.com/",
+    "repositories":
+    [
+            {
+                "type": "vcs",
+                "url": "https://github.com/tigerdile/steganography"
+            }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "zendframework/zend-math": "2.5.2",
+        "zendframework/zendframework": "^2.5",
+        "hautelook/phpass": "dev-master",
+        "stripe/stripe-php" : "5.*",
+        "paragonie/halite": "1.6.0",
+        "jamesryanbell/cloudflare": "dev-master",
+        "kzykhys/steganography": "dev-master",
+        "ircmaxell/random-lib": "dev-master",
+        "patreon/patreon": "dev-master",
+        "chobie/jira-api-restclient": "dev-master",
+        "maennchen/zipstream-php": "dev-master"
+    }
+}

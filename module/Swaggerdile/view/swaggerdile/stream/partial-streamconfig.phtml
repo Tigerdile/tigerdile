@@ -1,0 +1,68 @@
+<?php $show = isset($show) && $show; ?>
+
+      <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
+        <div class="panel panel-default">
+          <?php if(!$show): ?>
+            <div class="panel-heading" role="tab" id="headinginstructions">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseinstructions" aria-expanded="false" aria-controls="collapseinstructions">
+                  Your Stream Configuration - Click for Instructions
+                </a>
+              </h4>
+            </div>
+          <?php endif ?>
+          <div id="collapseinstructions" class="panel-body <?php if(!$show): ?> panel-collapse collapse <?php endif ?>" role="tabpanel" aria-labelledby="headinginstructions">
+            <h3>Open Broadcaster Instructions</h3>
+            <p>Open Broadcaster supports Windows, Mac, and Linux.  It is free
+               to use and the easiest to set up with Tigerdile.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              You can get Open Broadcaster
+              <a href="https://obsproject.com/" target="_blank">here</a>,
+              and then you can download a profile here:
+              <a href="<?= $this->url('stream/detail/obsexport', array('stream' => $stream->getUrl())) ?>">Download Tigerdile-OBS-Profile.zip</a>
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              To install the OBS profile, unzip the Tigerdile-OBS-Profile.zip
+              file and put the 'Tigerdile' folder somewhere easy for you
+              to find.  Under OBS' "Profile" menu, pick "Import", and select
+              the Tigerdile folder (or the basic.ini file inside the folder
+              as applicable).  It should set it all up for you!
+              You can delete the ZIP file and the Tigerdile folder when
+              you are done.
+            </p>
+            <h3>XSplit / Others</h3>
+            <p>
+              We have
+              <a href="<?= $this->url('xsplit') ?>" target="_blank">XSplit Specific Instructions</a>
+              but you will need the following bits of information:
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              <strong>RTMP URL:</strong> rtmp://stream.tigerdile.com/live?token=<?= urlencode($stream->getRtmpPassword()) ?>
+            </p>
+            <p>
+              <strong>Stream Name:</strong> <?= $stream->getUrl() ?>
+            </p>
+            <p>
+              <em>Note: "Stream Name" is also known as Play Path or Stream Key in other applications.</em>
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              <strong>
+                Tigerdile recommends 20 FPS, 600 to 1000 max bitrate,
+                and VBR (Variable Bit Rate) mode.  The VBR mode is
+                EXTREMELY IMPORTANT and your viewers will have a lousy
+                experience if you don't use it!
+              </strong>
+            </p>
+            <?php if($show): ?>
+              <h3 class="text-center">
+                <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl())) ?>">Click Here to Go to your Stream Page</a>
+              </h3>
+            <?php endif ?>
+          </div>
+        </div>
+      </div>

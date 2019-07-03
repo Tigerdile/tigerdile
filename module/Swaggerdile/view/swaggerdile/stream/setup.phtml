@@ -1,0 +1,307 @@
+<?php
+    $this->headLink()->appendStylesheet($this->basePath('css/summernote.css'));
+    $this->inlineScript()->appendFile($this->basePath('js/summernote.min.js'));
+?>
+<style>
+  label {
+    color: #aaffaa;
+  }
+
+  p.help-block {
+    font-style: italic;
+  }
+
+  div.form-group ul li {
+    color: #ff0000;
+  }
+</style>
+<?php if($done): ?>
+  <h1>You're Set Up!</h1>
+  <?= $this->partial('swaggerdile/stream/partial-streamconfig.phtml',
+                        array('stream' => $stream, 'show' => true)) ?>
+<?php else: ?>
+
+
+<h1>Tigerdile's Setup Wizard</h1>
+
+<?php if($hasErrors): ?>
+  <div class="jumbotron text-center">
+    <h3>
+      There were some errors on your submission that we couldn't catch
+      right away.  Please double-check your new stream submission and
+      try again.
+    </h3>
+  </div>
+<?php endif ?>
+
+<div class="jumbotron">
+  <form enctype="multipart/form-data" method="post" action="<?= $this->url('setup') ?>">
+    <?php if(!$hasErrors): ?>
+      <div id="1tab">
+        <p>Welcome to Tigerdile's setup wizard!  This tool will do the initial
+           set-up of your stream.  Once done, you can do additional design
+           configuration; we're just going to cover the fundamentals right now.
+        </p>
+        <p>Before you begin, we recommend you select a streaming software.
+           Tigerdile can automatically set up Open Broadcaster Studio (OBS) for you,
+           so we recommend that one.  However, XSplit is a good Windows-only
+           alternative if you have performance problems with OBS.
+        </p>
+        <ul>
+          <li><a href="https://obsproject.com/" target="_blank">Open Broadcaster Studio (OBS)</a>
+              - For Windows, Mac, and Linux!
+          </li>
+          <li><a href="https://www.xsplit.com/" target="_blank">XSplit</a>
+             - Windows Only, get the "Broadcaster" version.
+          </li>
+        </ul>
+        <p class="text-center">
+          <a href="#" class="btn btn-default btn-lg next-step">Next Step</a>
+        </p>
+      </div>
+    <?php endif ?>
+    <div id="2tab" style="<?= $hasErrors ? '' : 'display: none;' ?>">
+      <p>First, we're going to set up your stream page.  This is the basic
+         stuff; there's more you can do afterwards, but, let's keep it
+         simple for now.
+      </p>
+      <div class="form-group">
+        <label for="title"><?= $form->get('title')->getLabel() ?></label>
+        <p class="help-block">This is the title of your Stream Page.</p>
+        <?= $this->FormElement($form->get('title')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('title')); ?>
+      </div>
+      <div class="form-group">
+        <label for="title"><?= $form->get('stream_blurb')->getLabel() ?></label>
+        <p class="help-block">
+          A short description that is displayed on the stream listing
+          (Your "Stream Info" column).
+        </p>
+        <?= $this->FormElement($form->get('stream_blurb')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('stream_blurb')); ?>
+      </div>
+      <div class="form-group">
+        <label for="title"><?= $form->get('url')->getLabel() ?></label>
+        <p class="help-block">
+          To reach your stream, your viewers will go to:
+          https://<strong>StreamURL</strong>.tigerdile.com
+          where "<strong>StreamURL</strong>" is whatever you put in
+          this field.  It can be letters, numbers, and dashes only.
+        </p>
+        <?= $this->FormElement($form->get('url')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('url')); ?>
+        <?php if($urlError): ?>
+          <ul id="urlError">
+            <li>This URL is in use by another stream.  Pick another, please!</li>
+          </ul>
+        <?php endif ?>
+      </div>
+      <div class="form-group">
+        <label for="title"><?= $form->get('is_nsfw')->getLabel() ?></label>
+        <p class="help-block">
+          This is the rating of your stream.  "Safe for work" means your
+          stream is safe for viewers of all ages.  "Not safe for work" means
+          your stream is for adults only.
+        </p>
+        <?= $this->FormElement($form->get('is_nsfw')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('is_nsfw')); ?>
+      </div>
+      <?php if(!$hasErrors): ?>
+        <p class="text-center">
+          <a href="#" class="btn btn-default btn-lg prev-step">Previous Step</a>
+          <a href="#" class="btn btn-default btn-lg next-step">Next Step</a>
+        </p>
+      <?php endif ?>
+    </div>
+    <div id="3tab" style="<?= $hasErrors ? '' : 'display: none' ?>">
+      <p>These settings are related to how your video works.  After you fill
+         this stuff in, you'll be ready to stream!
+      </p>
+      <div class="form-group">
+        <label for="title"><?= $form->get('rtmp_password')->getLabel() ?></label>
+        <p class="help-block">
+          This is the password you will use to start broadcasting.
+          This is NOT a secure password, so please use a simple password that
+          you don't use anywhere else.
+        </p>
+        <?= $this->FormElement($form->get('rtmp_password')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('rtmp_password')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('viewer_password')->getLabel() ?></label>
+        <p class="help-block">
+          If you want to stream privately, you can set a password your viewers
+          must use to view your stream.  This is optional.
+        </p>
+        <?= $this->FormElement($form->get('viewer_password')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('viewer_password')); ?>
+      </div>
+      <div class="form-group">
+        <label for="aspect_ratio"><?= $form->get('aspect_ratio')->getLabel() ?></label>
+        <p class="help-block">
+          Aspect ratio refers to the shape of your video stream.
+          Tigerdile supports 16:9 (which matches most computer screens)
+          and 4:3 (which is more square, like a TV).
+        </p>
+        <div>
+          <div class="col-md-7">
+            <?= $this->FormElement($form->get('aspect_ratio')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('aspect_ratio')); ?>
+          </div>
+          <div class="col-md-5 text-center">
+            <img style="margin-right: 10px;" src="<?= $this->basePath('img/16-by-9.png') ?>" />
+            <img src="<?= $this->basePath('img/4-by-3.png') ?>" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="is_allow_guests"><?= $form->get('is_allow_guests')->getLabel() ?></label>
+        <p class="help-block">
+          Guests are users that are have not registered on Tigerdile.
+          Their names will show up prefixed with "g." to distinguish them
+          from registered users.  Because registration is easy, and guests
+          are difficult to ban, we recommend leaving this "off" but it is
+          your choice.
+        </p>
+        <?= $this->FormElement($form->get('is_allow_guests')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('is_allow_guests')); ?>
+      </div>
+      <p class="text-center">
+        <?php if(!$hasErrors): ?>
+          <a href="#" class="btn btn-default btn-lg prev-step">Previous Step</a>
+        <?php endif ?>
+        <input type="submit" name="act" value="Done" class="btn btn-default btn-lg" />
+      </p>
+    </div>
+  </form>
+</div>
+<?php $this->inlineScript()->captureStart() ?>
+jQuery(document).ready(function() {
+    // Common method for getting a form value
+    function getFormValue(name) {
+        return jQuery('[name="' + name + '"]').val();
+    }
+
+    // Common method for setting an error.
+    function setError(name, err) {
+        var lz = jQuery('[name="' + name + '"]');
+
+        if(!lz.siblings('ul').length) {
+            lz.parent().append('<ul></ul>');
+        }
+
+        var newLi = jQuery('<li></li>').text(err);
+        lz.siblings('ul').append(newLi);
+    }
+
+    var checkMap = [
+        0, // There is no tab 0
+        function() {  // tab 1 is informational.
+            return true;
+        },
+
+        function() { // tab 2
+            var noErrors = true;
+
+            if(!getFormValue('title').length) {
+                noErrors = false;
+                setError('title', 'You must provide a title.');
+            }
+
+            if(!getFormValue('stream_blurb').length) {
+                noErrors = false;
+                setError('stream_blurb', 'You must provide a short description of your stream.');
+            }
+
+            var url = getFormValue('url');
+
+            if(!url.length) {
+                noErrors = false;
+                setError('url', 'You must provide a URL.');
+            } else if(!url.match(/^[\w\d\-]+$/)) {
+                noErrors = false;
+                setError('url', "The URL may be letters, numbers, and the dash character only.  Remember, this is just the part of the URL that names your stream; you don't have to include http:// and all that other stuff.");
+            }
+
+            return noErrors;
+        },
+        function() { // tab 3
+            var noErrors = true;
+
+            var rtmpPassword = getFormValue('rtmp_password');
+
+            if(!rtmpPassword.length) {
+                noErrors = false;
+                setError('rtmp_password', 'You must provide a password.');
+            } else if(!rtmpPassword.match(/^[a-zA-Z\d_\-]+$/)) {
+                noErrors = false;
+                setError('rtmp_password', 'Please only use letters, numbers, underline, and dash in your password.  Remember, this is not super secure, so it is okay to keep it simple.');
+            }
+
+            return noErrors;
+        }
+    ]
+
+    jQuery('.next-step').click(function(ev) {
+        ev.preventDefault();
+        var thisTab = jQuery(this).parent().parent();
+        var tabNum = parseInt(thisTab.attr('id'));
+
+        // run validation.
+        jQuery('div.form-group ul').remove();
+
+        if(!checkMap[tabNum]()) {
+            return false;
+        }
+
+        // For tab 2, we need to make sure the url is okay.
+        // This is annoying because sync ajax is depreciated.
+        if(tabNum == 2) {
+            var url = getFormValue('url');
+
+            jQuery.ajax({
+                'url': '<?= $this->url('rest', array('action' => 'checkurl')) ?>',
+                data: {'url': url},
+                method: 'POST',
+                success: function(data) {
+                    if(data['available']) {
+                        thisTab.hide();
+                        jQuery('#' + (tabNum+1) + 'tab').show();
+                        window.scrollTo(0, 0);
+                    } else {
+                        setError('url', 'That URL is in use by someone else.  Please pick another!');
+                    }
+                }
+            });
+        } else {
+            thisTab.hide();
+            jQuery('#' + (tabNum+1) + 'tab').show();
+            window.scrollTo(0, 0);
+        }
+
+        return false;
+    });
+
+    jQuery('.prev-step').click(function(ev) {
+        ev.preventDefault();
+        var thisTab = jQuery(this).parent().parent();
+        var tabNum = parseInt(thisTab.attr('id'));
+
+        thisTab.hide();
+        jQuery('#' + (tabNum-1) + 'tab').show();
+        window.scrollTo(0, 0);
+        return false;
+    });
+
+    jQuery('form').submit(function(ev) {
+        if(!checkMap[3]()) {
+            ev.preventDefault();
+            return false;
+        }
+
+        return true;
+    });
+});
+<?php $this->inlineScript()->captureEnd() ?>
+<?php endif ?>

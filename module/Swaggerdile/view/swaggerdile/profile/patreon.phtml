@@ -1,0 +1,276 @@
+<?php
+    // Set up error attributes
+    $errorClasses = 'bg-danger text-danger no-bullets';
+    $this->getHelperPluginManager()->get('FormElementErrors')
+         ->setAttributes(array('class' => $errorClasses));
+
+    $myTiers = array();
+    foreach($tiers as $tier) {
+        $myTiers[$tier->getId()] = sprintf("%s (\$%s)", $tier->getTitle(),
+                                           number_format($tier->getPrice(),2));
+    }
+
+    // Set up our form
+    $form->prepare();
+?>
+<?php if(!empty($messages)): ?>
+    <div class="jumbotron">
+        <ul>
+            <?php foreach($messages as $message): ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+<?php endif ?>
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/profile/partial-profile-menu.phtml',
+                                array('isOwner' => $isOwner, 'editMode' => 0,
+                                      'profile' => $profile, 'user' => $user,
+                                      'subscriberTier' => $subscriberTier));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <h1>Link Your Patreon</h1>
+        <?php if($patreonValidated) : ?>
+            <div class="panel panel-default">
+                <div class="panel-body bg-success">
+                    <strong>Your Patreon account is linked!  Scroll to the bottom to
+                            import settings and to link your Swaggerdile Tiers to
+                            Patreon Rewards so your users can access content!</strong>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="panel panel-default">
+                <div class="panel-body bg-danger">
+                    <strong>Your Patreon account is not yet linked.</strong>
+                </div>
+            </div>
+        <?php endif ?>
+        <h1>What's This?</h1>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <?php if($patreonValidated) : ?>
+                    <a href="#" onclick="jQuery('.benefits').toggle(); return false;">Click to expand...</a>
+                <?php endif ?>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">There are three big benefits to linking your Swaggerdile
+                   account to your Patreon account.  The first is that you can
+                   import your Patreon settings into your Swaggerdile profile.
+                   Your text, rewards, and milestones will all be imported.
+                </p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">&nbsp;</p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">The second benefit is your Patreon sponsors will be able to
+                   access your Swaggerdile files.  You can use Swaggerdile to
+                   manage your content while still accepting payment through
+                   Patreon.  This saves you a lot of time and effort, while
+                   improving your user experience and giving you a good way
+                   to manage your content.
+                </p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">&nbsp;</p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">Finally, let's be honest.  Patreon's been hacked, gone down,
+                   lost data, billed users incorrectly, and had all kinds of
+                   issues.  Its nice to not have all your eggs in one basket,
+                   and Swaggerdile is a pretty decent plan-B if we do say
+                   so ourselves!
+                </p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">&nbsp;</p>
+                <p class="benefits" style="<?= $patreonValidated ? 'display: none;' : '' ?>">Unfortunately, Patreon does not make this process easy.
+                   Here's our step-by-step instructions for doing the link.
+                </p>
+            </div>
+        </div>
+        <h1>Instructions</h1>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <?php if($patreonValidated) : ?>
+                    <a href="#" onclick="jQuery('#instructions').toggle(); return false;">Click to expand...</a>
+                <?php endif ?>
+                <ol id="instructions" style="<?= $patreonValidated ? 'display: none;' : '' ?>">
+                  <li>Log in to Patreon.  Do this first, because otherwise the links will not work.
+                      <a href="https://www.patreon.com/login" target="_blank">Click here to open
+                      Patreon's login screen in another window.</a>   If it takes you to Patreon's
+                      home page, then you are probably already logged in.
+                  </li>
+                  <li>Next, go to Patreon's API management page.  This link will
+                      also open in a new window.
+                      <a href="https://www.patreon.com/platform/documentation/clients" target="_blank">
+                      https://www.patreon.com/platform/documentation/clients</a>
+                  </li>
+                  <li>Fill in the create a new client form.  This is what it looks like -- don't
+                      worry, scroll past the image and we've got some text for you to copy/paste.
+                      <img class="img-responsive" src="/img/how-to-swag.png" />
+                      The form has NO error checking and will silently fail if you get anything wrong.
+                      Type carefully.  Or, copy and paste from here:
+                      <p>&nbsp;</p>
+                      <table class="table">
+                        <tbody>
+                          <tr><td>Name:</td><td>Swaggerdile Connector</td></tr>
+                          <tr><td>Description:</td><td>Connects Swaggerdile to your Patreon Account</td></tr>
+                          <tr><td>Company Name:</td><td>Tigerdile LLC</td></tr>
+                          <tr><td>Company Domain:</td><td>swaggerdile.com</td></tr>
+                          <tr><td>Icon URL:</td><td>https://www.swaggerdile.com/img/swaggerdile.png</td></tr>
+                          <tr><td>Privacy Policy URL:</td><td>https://www.swaggerdile.com/terms-and-conditions</td></tr> 
+                          <tr><td>Terms of Service URL:</td><td>https://www.swaggerdile.com/terms-and-conditions</td></tr>
+                          <tr><td>Redirect URIs:</td><td>https://www.swaggerdile.com/patreon</td></tr>
+                        </tbody>
+                      </table>
+                  </li>
+                  <li>If nothing happens, you got an error -- check to make sure there are no extra spaces at
+                      the beginning or end of any of the fields.  If it worked, you'll see a block of text
+                      with your keys.  It'll look kind of like this, except with long crazy text instead
+                      of black rectangles:
+                      <img class="img-responsive" src="/img/tokens.png" />
+                  </li>
+                  <li>Enter that stuff into the fields below.</li>
+                </ol>
+            </div>
+        </div>
+        <h1>Your Patreon Keys</h1>
+        <form method="post" action="<?= $this->url('profile-patreon', array('profile' => $profile->getUrl())) ?>">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <?php if($patreonValidated) : ?>
+                        <a href="#" onclick="jQuery('.keys').toggle(); return false;">Click to expand...</a>
+                    <?php endif ?>
+                    <div class="keys" style="<?= $patreonValidated ? 'display: none;' : '' ?>">
+                        <div class="form-group">
+                            <label for="patreon_client_id"><?= $form->get("patreon_client_id")->getOption('label') ?></label>
+                            <?= $this->FormElement($form->get('patreon_client_id')->setAttribute('class', 'form-control')) ?>
+                            <?= $this->FormElementErrors($form->get('patreon_client_id')) ?>
+                        </div>
+                        <div class="form-group">
+                            <label for="patreon_client_secret"><?= $form->get("patreon_client_secret")->getOption('label') ?></label>
+                            <?= $this->FormElement($form->get('patreon_client_secret')->setAttribute('class', 'form-control')) ?>
+                            <?= $this->FormElementErrors($form->get('patreon_client_secret')) ?>
+                        </div>
+                        <div class="form-group">
+                            <label for="patreon_access_token"><?= $form->get("patreon_access_token")->getOption('label') ?></label>
+                            <?= $this->FormElement($form->get('patreon_access_token')->setAttribute('class', 'form-control')) ?>
+                            <?= $this->FormElementErrors($form->get('patreon_access_token')) ?>
+                        </div>
+                        <div class="form-group">
+                            <label for="patreon_refresh_token"><?= $form->get("patreon_refresh_token")->getOption('label') ?></label>
+                            <?= $this->FormElement($form->get('patreon_refresh_token')->setAttribute('class', 'form-control')) ?>
+                            <?= $this->FormElementErrors($form->get('patreon_refresh_token')) ?>
+                        </div>
+                        <?= $this->FormElement($form->get('act')) ?>
+                        <p><small>Note: your access token and refresh token fields will change
+                               when you save this information - when we verify it with Patreon,
+                               we get new keys.  This is normal, don't worry about it.</small></p>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <?php if($patreonValidated): ?>
+            <h1>Import From Patreon</h1>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>We can import your profile settings from Patreon to Swaggerdile, saving
+                       you time!  You can do this whenever you want, but it is most effective
+                       when you are first setting up your profile.
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>Pick the options below to start your import.  Take note of any
+                       warnings, because some of these options are "destructive".</p>
+                    <form method="post" id="importForm" action="<?= $this->url('profile-import', array('profile' => $profile->getUrl())) ?>">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" name="import_profile_title" value="1" /></td>
+                                    <td>Import Profile Title.
+                                        <strong>It will replace the title you currently have.</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="import_profile_images" value="1" /></td>
+                                    <td>Import Profile Image - This will import your profile
+                                        thumbnail from Patreon.
+                                        <strong>It will replace the icon you currently have.</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="import_profile_text" value="1" /></td>
+                                    <td>Import Profile Text - this will import your profile text.
+                                        <strong>It will replace any text you currently have.</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="import_milestones" value="1" /></td>
+                                    <td>Import Milestones - These are called "Goals" in
+                                        Patreon.  <strong>Importing goals will replace any
+                                        goals you have already set up.</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="import_tiers" value="1" /></td>
+                                    <td>Import Tiers - These are called "Rewards" in
+                                        Patreon.
+                                        <p class="bg-danger">
+                                            <strong>Any tiers you have created already WILL be
+                                                deleted and any customers assigned to those
+                                                tiers WILL be removed from them!  Its only
+                                                a good idea to import tiers for an initial
+                                                import.  This will be very disruptive to
+                                                an active profile!</strong>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="import_all" value="1" /></td>
+                                    <td>Import Everything!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <input type="submit" class="btn btn-success" value="Import!" />
+                    </form>
+                </div>
+            </div>
+            <h1>Map Swaggerdile Tiers to Patreon Rewards</h1>
+            <p>In order for Swaggerdile to know what content to show your
+               Patreon users, we need to link your Swaggerdile Tiers to
+               your Patreon rewards.  We have made a guess at what the
+               linkage should be, but you can tweak it if you need!
+            </p>
+            <form method="post" action="<?= $this->url('profile-tiermap', array('profile' => $profile->getUrl())) ?>">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Patreon Reward</th>
+                            <th><span class="glyphicon glyphicon-arrow-right"></span></th>
+                            <th>Swaggerdile Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($patreonTiers as $patTier): ?>
+                            <tr>
+                                <td><?= htmlentities($patTier->getTitle()) ?>
+                                    $<?= number_format($patTier->getPrice(), 2) ?></td>
+                                </td>
+                                <td><span class="glyphicon glyphicon-arrow-right"></span></td>
+                                <td><select name="patreonReward[<?= $patTier->getId() ?>]">
+                                    <option value="">- No Tier -</option>
+                                    <?php foreach($myTiers as $tierId => $tier): ?>
+                                        <option value="<?= $tierId ?>"<?= $tierId == $patTier->getTierId() ? ' selected' : '' ?>><?= $tier ?></option>
+                                    <?php endforeach ?>
+                                    </select>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+                <input type="submit" class="btn btn-success btn-lrg" value="Save" />
+            </form>
+        <?php endif ?>
+    </div>
+</div>
+<script>
+<!--
+    jQuery('input[name="import_all"]').click(function() {
+        if(jQuery(this).prop('checked')) {
+            jQuery('#importForm').find('input[type="checkbox"]').prop('checked', true);
+        } else {
+            jQuery('#importForm').find('input[type="checkbox"]').prop('checked', false);
+        }
+
+        return true;
+    });
+-->
+</script>

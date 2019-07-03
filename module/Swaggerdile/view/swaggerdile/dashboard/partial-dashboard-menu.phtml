@@ -1,0 +1,22 @@
+<?php /*
+<a href="<?= $this->url('dashboard') ?>" class="btn btn-success btn-lg" style="width: 100%;">Activity Stream</a>
+ */
+?>
+<a href="<?= $this->url('stream') ?>" class="btn btn-success btn-lg" style="width: 100%;">Stream List</a>
+<a href="<?= $this->url('dashboard-settings') ?>" class="btn btn-default btn-lg" style="width: 100%;">User Settings</a>
+<?php if(count($user->getProfiles()) > 0) : ?>
+   <a href="<?= $this->url('stream/detail/edit', array('stream' => $user->getProfiles()[0]->getUrl())) ?>" class="btn btn-default btn-lg">Stream Settings</a>
+    <a href="<?= $this->url('profiles', array('profile' => $user->getProfiles()[0]->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Your Profile</a>
+<?php /*
+    <a href="<?= $this->url('dashboard-financial') ?>" class="btn btn-default btn-lg" style="width: 100%;">Financial</a>
+ */ ?>
+<?php /* Old Swaggerdile Stuff
+    <h3 class="text-center">Reports</h3>
+    <a href="<?= $this->url('reports', array('action' => 'orders')) ?>" class="btn btn-default btn-lg" style="width: 100%;">Orders</a>
+    <a href="<?= $this->url('reports', array('action' => 'declines')) ?>" class="btn btn-default btn-lg" style="width: 100%;">Declines</a>
+ */ ?>
+<?php endif ?>
+<?php if($user->isAdmin()) : ?>
+    <h3 class="text-center">Admin</h3>
+    <a href="<?= $this->url('admin') ?>" class="btn btn-default btn-lg" style="width: 100%;">Admin Panel</a>
+<?php endif ?>

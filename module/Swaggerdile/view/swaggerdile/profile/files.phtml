@@ -1,0 +1,268 @@
+<?php
+    if($isOwner) {
+        $this->inlineScript()->appendFile('/js/dropzone.js');
+    }
+
+    $this->inlineScript()->appendFile('/js/featherlight.min.js')
+                         ->appendFile('/js/featherlight.gallery.min.js');
+
+    $this->headLink()->appendStylesheet('/css/featherlight.min.css')
+                     ->appendStylesheet('/css/featherlight.gallery.min.css');
+?>
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/profile/partial-profile-menu.phtml',
+                                array('isOwner' => $isOwner, 'editMode' => 0,
+                                      'profile' => $profile, 'user' => $user,
+                                      'subscriberTier' => $subscriberTier,
+                                ));
+        ?>
+        <?php if($isOwner) : ?>
+            <a class="btn btn-lg btn-default" style="width: 100%;" href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => 'mkdir')) ?>?cwd=<?= $path ?>">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add New Folder
+            </a>
+            <a id="filedrop" class="btn btn-lg btn-default" style="width: 100%;" href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => 'mkfile')) ?>?cwd=<?= $path ?>">
+                <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                Upload Files
+            </a>
+            <a id="foldermove" class="btn btn-lg btn-default" style="width: 100%;" href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => 'mkfile')) ?>?cwd=<?= $path ?>">
+                <span class="glyphicon glyphicon-move"></span>
+                Change Folder
+            </a>
+            <a id="deletefiles" class="btn btn-lg btn-default" style="width: 100%;" href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => 'mkfile')) ?>?cwd=<?= $path ?>">
+                <span class="glyphicon glyphicon-trash"></span>
+                Delete Files
+            </a>
+        <?php endif ?>
+    </div>
+    <div class="col-md-9">
+        <ol class="breadcrumb">
+            <li><a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl())) ?>"><?= $profile->getTitle() ?></a></li>
+            <?php
+                $path = array();
+                $pathString = '';
+
+                foreach($pathSegments as $segment) :
+                    $path[] = $segment->getId(); ?>
+                <li><a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => implode('/', $path))) ?>"><?= $segment->getTitle() ?></a></li>
+            <?php endforeach;
+                $pathString = implode('/', $path);
+             ?>
+        </ol>
+        <?php if($isOwner) : ?>
+            <h3>You can drag-and-drop files into the window to upload!  Maximum file size: 100 MB</h3>
+        <?php endif ?>
+        <?php if(!($numItems = count($directoryContents))) : ?>
+            <h2 class="remove-on-upload">Sorry!  Nothing to see here ... yet.</h2>
+            <div id="file-list-body" class="row">
+            
+            </div>
+        <?php else: ?>
+           <div class="row">
+                <a class="col-md-12 btn btn-default panel galleryMode" style="text-align: left; width: 100%;" href="#">
+                    <span class="glyphicon glyphicon-picture"></span>
+                    View in Gallery Mode
+                </a>
+            </div>
+            <div id="file-list-body" class="row">
+                <?php
+                    for($i = 0; ($i < $numItems) && ($i < $pageSize); $i++) :
+                        $item = $directoryContents[$i]; ?>
+                    <?= $this->partial('swaggerdile/profile/partial-file-row.phtml', array('isOwner' => $isOwner, 'item' => $item, 'profile' => $profile, 'pageSize' => $pageSize, 'path' => $pathString)) ?>
+                <?php endfor ?>
+            </div>
+            <br />
+            <br />            
+            <div class="text-center">
+                  <?php if($page != 0) : ?>
+                    <a class="btn btn-success btn-lg" href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $pathString)) ?>?p=<?= $page-1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>">&laquo; Previous</a>
+                  <?php endif ?>
+                  <?php if($numItems > $pageSize) : ?>
+                    <a class="btn btn-success btn-lg" href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $pathString)) ?>?p=<?= $page+1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>">Next &raquo;</a>
+                  <?php endif ?>
+            </div>
+        <?php endif ?>
+    </div>
+</div>
+<?php $this->inlineScript()->captureStart(); ?>
+
+    <?php if($isOwner) :  // stuff that applies to owners only.  ?>
+        // @TODO : implement 'fallback' for crappy web browsers. :)
+        jQuery('body').dropzone({
+                url: "<?= $this->url('profile-upload', array('profile' => $profile->getUrl(), 'activity' => strlen($pathString) ? $pathString : null)) ?>",
+                maxFileSize: 99,
+                uploadMultiple: true,
+                addRemoveLinks: false,
+                clickable: false,
+                previewsContainer: false,
+                parallelUploads: 10,
+                sendingmultiple: function(files, xhr, fromdata) {
+                    if(jQuery.featherlight.current()) {
+                        return true;
+                    }
+
+                    var html = '<h3>File upload in progress!</h3><p id="upload-progress"></p>';
+                    jQuery.featherlight(html);
+                },
+                uploadprogress: function(file, progress, bytesSent) {
+                    jQuery('#upload-progress').text('Sending ' + file.name + ': ' + parseInt(progress) + '%');
+                },
+                successmultiple: function(file, responseText) {
+                    jQuery('.remove-on-upload').remove();
+                    jQuery('#file-list-body').append(responseText);
+                },
+                queuecomplete: function() {
+                    jQuery('#upload-progress').text('Done!  Reloading page.');
+                    window.location.reload();
+                },
+                error: function(file, message) {
+                    alert('There was an error while uploading file ' + file.name + ': ' + message + "\n\nYou can try again, or you can contact support@tigerdile.com and send this message to them.");
+                }
+        });
+
+        jQuery('#file-list-body').sortable({
+            start: function(ev, ui) {
+                jQuery(this).addClass('noclick');
+            },
+            stop: function(ev, ui) {
+                // push before and after to server
+                jQuery.ajax('<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => 'reorder')) ?>',
+                    {
+                        async: false,
+                        data: jQuery('#file-list-body').sortable('serialize', {key: 'order[]'}),
+                        method: 'POST',
+                        success: function(data) {
+                        
+                        }
+                    }
+                );
+            },
+            tolerance: "pointer",
+            helper: 'clone',
+            placeholer: 'col-md-4',
+            forcePlaceholderSize: true
+//            appendTo: "body"
+        });
+
+        // This prevents the drag and drop feature from
+        // triggering a click and must be before all the
+        // other click event handlers.
+        jQuery('#file-list-body div div a').click(function(ev) {
+            if(jQuery('#file-list-body').hasClass('noclick')) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                ev.stopImmediatePropagation();
+
+                jQuery('#file-list-body').removeClass('noclick');
+                return false;
+            }
+
+            return true;
+        });
+
+        jQuery('input[name="selectedFiles"]').click(function() {
+            if(this.checked) {
+                jQuery(this).parents('div.file-square').addClass('bg-info');
+            } else {
+                jQuery(this).parents('div.file-square').removeClass('bg-info');
+            }
+        });
+
+        jQuery('#foldermove').click(function() {
+            // Do we have any selected?
+            var selected = jQuery('input[name="selectedFiles"]:checked');
+
+            if(!selected.length) {
+                alert('You need to pick some files, first.');
+                return false;
+            }
+
+            toPost = {
+                'return' : '<?= $this->serverUrl(true) ?>',
+                'selectedFiles[]' : []
+            }
+
+            selected.each(function() {
+                toPost['selectedFiles[]'].push(jQuery(this).val());
+            });
+
+            jQuery.post('<?= $this->url('profile-file-move', array('profile' => $profile->getUrl())) ?>', toPost, function(data) {
+                jQuery.featherlight(data);
+                //jQuery('div.featherlight-content').html(data);
+            });
+
+            return false;
+        });
+
+        jQuery('#deletefiles').click(function() {
+            // Do we have any selected?
+            var selected = jQuery('input[name="selectedFiles"]:checked');
+
+            if(!selected.length) {
+                alert('You need to pick some files, first.');
+                return false;
+            }
+
+            if(selected.parents('div.is-folder').length) {
+                alert('You cannot bulk delete folders at this time; sorry!');
+                return false;
+            }
+
+            toPost = {
+                'return' : '<?= $this->serverUrl(true) ?>',
+                'selectedFiles[]' : []
+            }
+
+            selected.each(function() {
+                toPost['selectedFiles[]'].push(jQuery(this).val());
+            });
+
+            jQuery.post('<?= $this->url('profile-file-delete', array('profile' => $profile->getUrl())) ?>', toPost, function(data) {
+                jQuery.featherlight(data);
+                //jQuery('div.featherlight-content').html(data);
+            });
+
+            return false;
+        });
+    <?php endif ?>
+    <?php if($numItems > 0) : ?>
+        jQuery('.galleryMode').click(function() {
+            jQuery.get('<?= $this->url('profile-lightbox', array('profile' => $profile->getUrl(), 'activity' => $pathString)) ?>?p=<?= $page*$pageSize ?>&o=<?= $order ?>&d=<?= $orderDirection ?>&id=<?= $directoryContents[0]->getId() ?>', function(data) {
+                jQuery.featherlight(data);
+            });
+        });
+
+        jQuery('.isImageLink').click(function(ev) {
+            ev.preventDefault();
+
+            jQuery.get('<?= $this->url('profile-lightbox', array('profile' => $profile->getUrl(), 'activity' => $pathString)) ?>?p=' + (<?= $page*$pageSize ?>+jQuery(this).parents('div.file-square').parent().index()) + '&o=<?= $order ?>&d=<?= $orderDirection ?>&id=' + parseInt(this.id), function(data) {
+                jQuery.featherlight(data);
+            });
+
+            return false;
+        });
+
+        jQuery('body').on('click','.lightbox-link', function(ev) {
+            ev.preventDefault();
+
+            var target = jQuery(this).attr('href');
+    
+            jQuery.get(target, function(data) {
+                //jQuery.featherlight(data);
+                jQuery('div.featherlight-content').html(data);
+            });
+
+            return false;
+        });
+
+    <?php endif ?>
+
+<?php $this->inlineScript()->captureEnd(); ?>
+<?php /* This fixes drag and drop bug for sorting :P */ ?>
+<style>
+    #file-list-body > div {
+        border-top: 1px solid transparent;
+    }
+</style>

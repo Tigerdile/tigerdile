@@ -1,0 +1,307 @@
+<?php
+    // we use this everywhere
+    $support = $this->url('support');
+?>
+<div class="row">
+  <div class="col-md-12 content-heading">
+    <h1>Frequently Nommed Questions</h1>
+    <hr />
+  </div>
+  <div class="col-md-12">
+    <p>Tigerdile fields your questions!  His one eye gazes deeply into yours
+       as you speak, and the other eye is looking somewhere over your shoulder.
+       You're not sure where.
+    </p>
+    <h4 class="text-center">Click a question to see the answer!</h4>
+  </div>
+</div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'What is Tigerdile?',
+                        'body' => <<<EOS
+<p>Tigerdile is a crazy, silly monster that has lent us his name for our
+   website.  He was created during Caribou's art stream in the Summer of 2012
+   and was posted to FA with an assurance from the viewers that they would
+   each post a testimonial on how Tigerdile has made their life better.  He
+   later became the Patron Saint of Camera Focus.  His legend has grown since
+   then!
+</p>
+<p>&nbsp;</p>
+<p>Tigerdile is never taken seriously and never rule 34'd.  His official
+   persona is akin to a sleazy pimp monster who specializes in
+   innuendo while maintaining a generally &quot;save for work&quot;
+   demeanor.  Tigerdile believes that all the artists are his special
+   stable of &quot;providers&quot; and watchers are his &quot;clients&quot;.
+   Only true believers know the REAL Tigerdile!
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'What is the deal with Tigerdile, the website?',
+                        'body' => <<<EOS
+<p>By artists, for artists.  The idea for Tigerdile came from some
+   conversations between a brilliant engineer, and an artist with more
+   ideas than sense.  The concept was to create a co-op space that could
+   be shared by artists with mutual purpose for mutual gain.  We hoped to
+   create a site where it was safe for artists to stream the sort of work
+   they do without heavy restrictions or random traffic that a large
+   non-artist-specific site provides.  We hoped to keep costs down, and
+   ask everyone to chip in a small bit so we could continue to improve
+   and afford to run the server at an effective bandwidth.  We wish it
+   could be free but the world just doesn't agree!
+</p>
+<p>&nbsp;</p>
+<p>This site is a work in progress, and constantly evolving to improve
+   the experience of both viewer and artist.  We're one of the oldest
+   artist-focused streaming sites, and we're hoping to make it the best
+   as well!
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Do you take PayPal?',
+                        'body' => <<<EOS
+<p>Not &quot;officially.&quot;  Because Tigerdile is a site that may
+   feature adult content, we do not feel comfortable providing an integrated
+   PayPal process.  PayPal is well known for seizing funds on a whim!
+</p>
+<p>&nbsp;</p>
+<p>Tigerdile's credit card form is secure and posts your information
+   straight to our card processor -- we never actually see your card
+   info on our servers!  But if you don't want to pay us that way,
+   <a href="{$support}">Contact Support</a> and we'll
+   make other arrangements.
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Who runs Tigerdile?',
+                        'body' => <<<EOS
+<p>
+   <a href="https://www.furaffinity.net/user/caribou" target="_blank">Sara &quot;Caribou&quot; Miles</a>
+   and
+   <a href="https://www.furaffinity.net/user/mountaingoat" target="_blank">TanabiGoat</a>
+   are the co-owners of Tigerdile.  Sara is the content administrator and makes
+   the final call on all content decisions.  Tanabi is the operational
+   administrator and does most of the day-to-day community management and
+   programming.
+</p>
+<p>&nbsp;</p>
+<p>We also have a crew of administrators / moderators.  Currently, they are:</p>
+<p>&nbsp;</p>
+<ul>
+  <li><a href="https://www.furaffinity.net/user/flinters" target="_blank">Flinkters</a>, admin and beta tester</a></li>
+  <li><a href="https://www.furaffinity.net/user/brooklynx" target="_blank">BrooklynX</a>, moderator</li>
+  <li><a href="https://www.furaffinity.net/user/temrin" target="_blank">Temrin</a>, Social Media Coordinator / Manager / HomeCon.  The person who retweets everything!</li>
+</ul>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Does Tigerdile require a monthly fee?',
+                        'body' => <<<EOS
+<p>Yes. Tigerdile is run as a professional internet service, with a top
+   quality dedicated server, the best bandwidth we can get, backups, the
+   whole works.  We have a disaster recovery plan to keep our artists
+   online even if our servers blow up.  And we've got plans to go global
+   and provide service and better experience for folks outside the
+   United States.
+</p>
+<p>&nbsp;</p>
+<p>It costs a lot to run Tigerdile, and many of our users use Tigerdile to
+   make money.  Therefore, it's only fair that everyone pitch in to help
+   out; Tigerdile was built to be a reliable, professional service for our
+   reliable, professional artists that need to be able to stream as part
+   of their income.
+</p>
+<p>&nbsp;</p>
+<p>The owners of Tigerdile have never drawn 'profit money' out of the company
+   and the majority of the income is spent either improving the service
+   or marketing it.
+</p>
+<p>&nbsp;</p>
+<p>There are free streaming alternatives, but remember; on a free service,
+   you're a freeloader.  On Tigerdile, we provide support you can count
+   on and a reliable service.
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Is the 10 viewer cap on the Casual User plan a hard limit?',
+                        'body' => <<<EOS
+<p>No.  A little-known fact is that the 10 viewer cap is not a hard limit;
+   people will not get blocked out of your stream like they do on some
+   of our competitor sites.  The 10 viewer cap is purely honor system,
+   and it is acceptable for you to occasionally go over the limit.  If you
+   consisitently go over the limit, you might attract some polite inquiries
+   from the administration.
+</p>
+<p>&nbsp;</p>
+<p>If you only stream like once a month, we're also agreeable to letting you
+   just use the $5 plan no matter how many people you get.  As an honor
+   system, it can be flexible, as long as you're doing what is fair.
+   Feel free to talk to <a href="{$support}">support</a>
+   if you have any questions.
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Gah!  It\'s broken!  Who do I complain to?',
+                        'body' => <<<EOS
+<p>Click on the <a href="{$support}">support link</a>, either
+   right here or on the site's header!
+</p>
+<p>&nbsp;</p>
+<p>All support tickets go straight to the site's programmer.  We are usually
+   very responsive from between about 10 AM to about midnight Eastern US time.
+   We respond to all support tickets within 24 hours.
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Do I need to register to chat on Tigerdile?',
+                        'body' => <<<EOS
+<p>That depends on the channel.  Artists can choose to allow 'guest users'
+   onto their chats.  The default is to only permit registered users on
+   chats and to not allow guests.  If you have a Tigerdile stream, you can
+   change this setting in the Your Stream page and click on the Chat Settings
+   tab.
+</p>
+<p>&nbsp;</p>
+<p>Guests will show up prefixed with a &quot;g.&quot; so that they cannot
+   hijack a registered user's name.
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'How do I see who\'s in the chat?  How do I resize chat?  Can chat be in a window?',
+                        'body' => <<<EOS
+<p>The answer to all of these is to look for the &quot;Popout&quot; icon
+   at the top left of the chat pane.  The popout version of chat is more
+   &quot;flexible&quot; than the embedded chat, and we highly recommend
+   its use.  The icon looks like this:
+   <img src="{$this->basePath('img/icon-popout.png')}" />
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Can I change my name in chat?',
+                        'body' => <<<EOS
+<p>Unfortunately, you can't change your name in chat on your own for
+   a number of reasons.  However,
+   <a href="{$support}">support</a> can help you with
+   a name change, so feel free to drop us a line!
+</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Your Recover Password System does not work -or- I typo\'d my email when I registered!  Help!',
+                        'body' => <<<EOS
+<p><a href="{$support}">Contact support!</a>  We can fix it!</p>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'Does Tigerdile support mobile browsers?',
+                        'body' => <<<EOS
+<p>Mostly!</p>
+<p>&nbsp;</p>
+<p>Mobile viewing of streams has become a very common use-case and, honestly,
+   its something Tigerdile's had a difficult time coping with.  Proper
+   mobile support requires a lot more infrastructure than Tigerdile can
+   currently afford.
+</p>
+<p>&nbsp;</p>
+<p>That being said, we've re-designed the site to be mobile friendly, and
+   we have added mobile support to our stream server so you should not
+   need a special browser to view streams.  We are driving hard to improve
+   our mobile support.
+</p>
+<p>&nbsp;</p>
+<p>If you are having trouble with Tigerdile on your mobile device, you
+   can try one of the following things:
+</p>
+<ul>
+  <li><a href="{$support}" target="_blank">Contact Support!</a>
+      Tell us what device you are using, and describe the problem
+      as best you can.  We can dig into it and see if there's something
+      we can do to improve it.  Let us know what stream you're watching
+      and what connection you are on (wi-fi, mobile data, etc.)
+  </li>
+  <li>
+      Try a different browser!  The &quot;protocol&quot; mobile devices
+      use to view streams is really fragile and kind of sucks.  You can
+      use a browser that supports flash and probably get a better
+      experience.  The following browsers are known to work with
+      Tigerdile:
+      <ul>
+        <li>Puffin - this one is known to work the best.</li>
+        <li>Flash Fox - this is 100% free, but some people report crashes.</li>
+        <li>Photon - Known to work for Android, but maybe not for i-Devices.</li>
+        <li>Dolphin - Works for some people, but this one seems to be the most problematic.</li>
+      </ul>
+  </li>
+</ul>
+EOS
+                    )
+    ) ?>
+  <?=
+    $this->partial('swaggerdile/index/partial-faq',
+                   array(
+                        'title' => 'I never get notified when my favorite artist starts streaming.  What gives?',
+                        'body' => <<<EOS
+<p>First off, make sure the emails aren't going to spam.  Because they
+   often wind up there, even though Tigerdile doesn't send unsolicited
+   mail.
+</p>
+<p>&nbsp;</p>
+<p>If the notifications aren't in your spam, then it means the artist didn't
+   send a notification!  Notifications do not automatically happen, the
+   artist has to choose to send them.  Not all artists use this feature.
+   We don't send automatic notifications because some artists may want
+   to have a low-key or even a private stream, and so its up to them
+   if they want to broadcast.
+</p>
+<p>&nbsp;</p>
+<p>The message is sent from the artist's &quot;Your Stream&quot; control
+   panel.  Feel free to remind your favorite artist that the feature is
+   available if they don't use it!
+</p>
+EOS
+                    )
+    ) ?>
+
+</div>

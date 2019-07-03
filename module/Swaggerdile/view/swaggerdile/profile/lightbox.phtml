@@ -1,0 +1,44 @@
+<?php
+    // we may have one, two, or three items.
+    $previous = $current = $next = false;
+
+    switch(count($contents)) {
+        case 1:
+            if($contents[0]->getId() == $contentId) {
+                $current = $contents[0];
+            }
+            
+            break;
+        case 2;
+            if($contents[0]->getId() == $contentId) {
+                $current = $contents[0];
+                $next = $contents[1];
+            } elseif($contents[1]->getId() == $contentId) {
+                $previous = $contents[0];
+                $current = $contents[1];
+            }
+
+            break;
+        case 3:
+            $previous = $contents[0];
+            $current = $contents[1];
+            $next = $contents[2];
+
+        default:
+    }
+
+?>
+<span class="featherlight-close-icon featherlight-close">X</span>
+<?php if(is_object($current)) : ?>
+    <?php if(\Swaggerdile\Media::contentHasThumbnail($current)) : ?>
+        <img class="featherlight-image featherlight-inner" src="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $path ? $path . '/' . $current->getId() : $current->getId())) ?>" />
+    <?php else : ?>
+        <span style="font-size: 100px;" class="glyphicon <?= $current->getTypeId() == 3 ? 'glyphicon-folder-open' : 'glyphicon-file' ?>"></span>
+    <?php endif ?>
+<?php endif ?>
+<?php if(is_object($previous)) : ?>
+    <a class="lightbox-link" href="<?= $this->url('profile-lightbox', array('profile' => $profile->getUrl(), 'activity' => $path)) ?>?p=<?= $position-1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>&id=<?= $previous->getId() ?>"><span class="featherlight-previous" title="previous"><span>&laquo;</span></span></a>
+<?php endif ?>
+<?php if(is_object($next)) : ?>
+    <a class="lightbox-link" href="<?= $this->url('profile-lightbox', array('profile' => $profile->getUrl(), 'activity' => $path)) ?>?p=<?= $position+1 ?>&o=<?= $order ?>&d=<?= $orderDirection ?>&id=<?= $next->getId() ?>"><span class="featherlight-next" title="next"><span>&raquo;</span></span></a>
+<?php endif ?>

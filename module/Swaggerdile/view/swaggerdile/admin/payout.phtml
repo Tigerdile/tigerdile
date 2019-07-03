@@ -1,0 +1,79 @@
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/admin/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <h3>Payout Requests</h3>
+        <?php
+            $num = count($payouts);
+        ?>
+        <div class="jumbotron">
+            <p><strong>Available balance: $<?= number_format($availableBalance, 2) ?></strong></p>
+            <p>Pending balance: $<?= number_format($pendingBalance, 2) ?></p>
+        </div>
+
+        <?php if(!empty($owed)):
+            $total = 0; ?>
+            <div class="jumbotron">
+                <p>Tigerdile owes the following people</p>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($owed as $owe): ?>
+                            <tr>
+                                <td><?= $owe->getDisplayName() ?></td>
+                                <td><?= $owe->getUserEmail() ?></td>
+                                <td>$<?= number_format($owe->getBalance(), 2) ?></td>
+                                <?php $total += $owe->getBalance(); ?>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>Total:</td>
+                            <td>$<?= number_format($total, 2) ?></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        <?php endif ?>
+
+        <div class="jumbotron">
+            <p>There are currently <?= $num ?> payout request<?= $num != 1 ? 's' : '' ?> outstanding.</p>
+        </div>
+        <?php if($num > 0): ?>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Requested On</th>
+                        <th>Requested By</th>
+                        <th>Amount</th>
+                        <th>Payout Method</th>
+                        <th>Pay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($payouts as $payout) : ?>
+                        <tr>
+                            <td><?= date('Y/m/d H:i:s', strtotime($payout->getCreated())) ?></td>
+                            <td><?= $payout->getDisplayName() ?> (<?= $payout->getUserEmail() ?>)<br />Target: <?= $payout->getTarget() ?></td>
+                            <td><?= number_format($payout->getAmount(), 2) ?></td>
+                            <td><?= $payout->getTitle() ?></td>
+                            <td><a href="#" class="btn btn-success">Pay</a></td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        <?php endif ?>
+    </div>
+</div>

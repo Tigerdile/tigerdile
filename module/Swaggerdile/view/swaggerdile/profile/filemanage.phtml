@@ -1,0 +1,217 @@
+<?php
+// Are we editing?
+$editMode = isset($form) && is_object($form);
+
+// Set up error attributes
+$errorClasses = 'bg-danger text-danger no-bullets';
+$this->getHelperPluginManager()->get('FormElementErrors')
+     ->setAttributes(array('class' => $errorClasses));
+
+// If we don't have a profile, then error.
+if(!is_object($profile)) : ?>
+<div class="jumbotron text-center">
+    <p>Whoops!  We couldn't find the profile you're looking for.</p>
+    <p>Please use our search feature in the header to look for a specific
+       profile, or click Browse to look around.</p>
+    <p>It's also possible that the owner of this profile has opted to
+       shut it down for some reason, or they could have changed their
+       URL.</p>
+    <p>If you're absolutely sure you have the URL right, click our Support
+       link in the menu and ask us.  We're happy to help!</p>
+</div>
+<?php elseif((!is_object($content)) && (!$editMode)) : ?>
+<div class="jumbotron text-center">
+    <p>Whoops!  We couldn't find the content you're looking for.</p>
+    <p>If you're absolutely sure you have the URL right, click our Support
+       link in the menu and ask us.  We're happy to help!</p>
+</div>
+<?php else:
+    if($editMode) :
+        $form->prepare();
+
+        // Keep track of our tier form's content fields.
+        $tierContentFields = array();
+        $milestoneContentFields = array();
+
+        // Grab our post form
+        $postForm = $form->get('content');
+    ?>
+    <form enctype="multipart/form-data" method="post" id="editPostForm" role="form" />
+    <input type="hidden" name="cwd" value="<?= $this->cwd ?>" />
+    <input type="hidden" name="typeId" value="<?= $this->typeId ?>" />
+    <?php endif ?>
+<?php if(!empty($this->messages)) : ?>
+    <div class="jumbotron text-center">
+        <?php foreach($this->messages as $message) : ?>
+            <p style="color: red;"><?= $message ?></p>
+        <?php endforeach ?>
+    </div>
+<?php elseif($editMode && count($form->getMessages())): ?>
+    <div class="jumbotron text-center">
+        <p style="color: red;">There is a problem with your submission.  Check below!</p>
+    </div>
+<?php endif ?>
+<?php if(!$editMode): ?>
+    <div class="row">
+        <h1 class="text-center">
+            <?= htmlentities($content->getTitle()) ?>
+        </h1>
+    </div>
+<?php endif ?>
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/profile/partial-profile-menu.phtml',
+                                array('isOwner' => $isOwner, 'editMode' => $editMode,
+                                      'profile' => $profile, 'subscriberTier' => $subscriberTier,
+                                      'post' => isset($content) ? $content : false,
+                                      'cancelLink' => $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $cwd)),
+                                      'user' => $user
+                                      ));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <?php if($editMode) : ?>
+            <div class="form-group">
+                <label for="file"><?= $postForm->get('title')->getOption('label') ?></label>
+                <?= $this->FormElement($postForm->get('title')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($postForm->get('title')); ?>
+            </div>
+            <?php if($this->typeId == 2) : // @TODO : fix hardcode, if file ?>
+                <?php if(is_object($content)) : ?>
+                    <div class="form-group">
+                        <a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $cwd ? $cwd . '/' . $content->getId() : $content->getId())) ?>" class="<?= substr($content->getContentType(), 0, 5) == 'image' ? 'isImageLink' : '' ?>" id="<?= $profile->getId()?>_image">
+                            <?php if(\Swaggerdile\Media::contentHasThumbnail($content)) : ?>
+                                    <img class="img-responsive center-block" src="<?= $this->url('secure-thumbnail', array('profile' => $profile->getUrl(), 'activity' => $content->getId())) ?>" />
+                            <?php else : ?>
+                                    <span style="font-size: 100px;" class="glyphicon <?= $content->getTypeId() == 3 ? 'glyphicon-folder-open' : 'glyphicon-file' ?>"></span>
+                            <?php endif ?>
+                        </a>
+                    </div>
+                <?php endif ?>
+                <div class="form-group">
+                    <label for="file"><?= $postForm->get('file')->getOption('label') ?> (Maximum size: 100 MB)</label>
+                    <?= $this->formElement($postForm->get('file')) ?>
+                    <?= $this->FormElementErrors($postForm->get('file')) ?>
+                </div>
+            <?php endif ?>
+            <label for="content">Optional Descriptive Text</label>
+			<div class="btn-toolbar editor-small" data-role="userContent-toolbar"
+				data-target="#userContent">
+				<div class="btn-group">
+					<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>
+					<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>
+					<a class="btn btn-default" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a>
+					<a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>
+					<a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>
+					<a class="btn btn-default" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>
+					<a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent"></i></a>
+					<a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a>
+					<a class="btn btn-default" data-edit="format-h1">h1</a>
+					<a class="btn btn-default" data-edit="format-h2">h2</a>
+					<a class="btn btn-default" data-edit="format-h3">h3</a>
+					<a class="btn btn-default" data-edit="format-h4">h4</a>
+					<a class="btn btn-default" data-edit="format-h5">h5</a>
+					<a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>
+					<a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>
+					<a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>
+					<a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>
+                </div>
+                <div class="btn-group">
+					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Select text, then use this to make a link"><i class="fa fa-link"></i></a>
+					<div class="dropdown-menu input-append">
+						<input placeholder="URL" type="text" data-edit="createLink" />
+						<button class="btn" type="button">Add</button>
+					</div>
+					<a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-unlink"></i></a>
+					<a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a>
+					<a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a>
+                    <div class="btn-group">
+                        <a id="pictureBtn" title="" class="btn btn-default" data-original-title="Insert picture (or just drag &amp; drop)">
+                            <i class="fa fa-picture-o"></i>
+                        </a>
+                        <input class="imgUpload" type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 39px; height: 30px;" />
+                    </div>
+				</div>
+			</div>
+            <?= $this->formElement($postForm->get('content')->setAttribute('id', 'content')); ?>
+        <?php endif ?>
+        <div id="userContent" class="<?= $editMode ? 'wysiwyg-box' : '' ?>">
+            <?= $editMode ? $postForm->get('content')->getValue() : $content->getContent() ?>
+        </div>
+        <?php
+            if($editMode) :
+                echo $this->FormElementErrors($postForm->get('content'));
+            ?>
+            <h3>Permission Settings</h3>
+            <div class="form-group">
+                <label for="isSample"><?= $postForm->get('isSample')->getOption('label') ?></label>
+                <?= $this->formElement($postForm->get('isSample')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($postForm->get('isSample')) ?>
+            </div>
+            <div class="form-group">
+                <label for="isNeverHistorical"><?= $postForm->get('isNeverHistorical')->getOption('label') ?></label>
+                <?= $this->formElement($postForm->get('isNeverHistorical')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($postForm->get('isNeverHistorical')) ?>
+            </div>
+            <div class="form-group">
+                <label for="isCommentsDisabled"><?= $postForm->get('isCommentsDisabled')->getOption('label') ?></label>
+                <?= $this->formElement($postForm->get('isCommentsDisabled')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($postForm->get('isCommentsDisabled')) ?>
+            </div>
+            <div class="form-group">
+                <label for="visibleToTiers"><?= $postForm->get('visibleToTiers')->getOption('label') ?></label>
+                <?= $this->formElement($postForm->get('visibleToTiers')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($postForm->get('visibleToTiers')) ?>
+            </div>
+            <?php if(($typeId == 3) && (is_object($content))) : // Recursion options for dirs ?>
+                <div class="form-group">
+                    <input type="checkbox" value="1" name="applyAllFiles" /> Apply permission changes to all items in this folder?
+                </div>
+                <div class="form-group" id="apply-recursive" style="display: none;">
+                    <input type="checkbox" value="1" name="applyRecursive" /> Apply permission changes to all items in all folders under this one?
+                </div>
+            <?php endif ?>
+            <input type="submit" name="act" class="btn btn-success btn-lg" value="Save Changes" />
+        <?php endif ?>
+    </div>
+</div>
+<?php if($editMode) : ?>
+    </form>
+    <?php 
+    $this->inlineScript()->appendFile('/js/jquery.hotkeys.js')
+                         ->appendFile('/js/bootstrap-wysiwyg.min.js')
+                         ->captureStart(); ?>
+    function addImageClass(ev) {
+        jQuery(this).find('img').addClass('img-responsive');
+    }
+
+    jQuery(document).ready(function() {
+        jQuery('#userContent').wysiwyg({
+            'toolbarSelector': '[data-role=userContent-toolbar]',
+            'form' : {
+                'text-field' : 'content',
+                'separate-binary' : false,
+            }
+        });
+
+        jQuery('#userContent').on('image-inserted', addImageClass);
+
+        jQuery('form#editPostForm').submit(function() {
+            jQuery('input#content').val(jQuery('#userContent').cleanHtml(true));
+
+            return true;
+        });
+
+        jQuery("input[name='applyAllFiles']").click(function() {
+            if(this.checked) {
+                jQuery('#apply-recursive').show();
+            } else {
+                jQuery('#apply-recursive').hide();
+            }
+        });
+    });
+    <?php $this->inlineScript()->captureEnd();
+    
+    endif;
+endif;

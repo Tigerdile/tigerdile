@@ -1,0 +1,78 @@
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/dashboard/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">
+
+        <?php if(!($numItems = count($subscriptions))) : ?>
+            <h1>You have no subscriptions yet!</h1>
+            <h2><a href="<?= $this->url('browse') ?>">Find some new favorites!</a></h2>
+        <?php else : ?>
+            <?php foreach($subscriptions as $subscription) : ?>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><a href="<?= ($profileUrl = $this->url('profiles', array('profile' => $subscription->getProfileUrl()))) ?>"><?= $subscription->getProfileTitle() ?></a>
+                        <?php if($subscription->getIsActive()) : ?>
+                             - $<?= number_format($subscription->getPayment(), 2) ?> per Month</h3>
+                        <?php endif ?>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            <?php if($subscription->getIsActive()) : ?>
+                                <?php $reallyActive = ($subscription->getIsPatreon()) || ((int)$subscription->getChildPaymentMethodId() > 0); ?>
+                                You <?= $reallyActive ? 'are' : 'were' ?> supporting
+                                &quot;<?= htmlentities($subscription->getProfileTitle()) ?>&quot;
+                                <?php if($subscription->getTierId()) : ?>
+                                    at the &quot;<?= htmlentities($subscription->getTierTitle()) ?>&quot; level
+                                <?php endif?>.
+                                <?php if($reallyActive && (!$subscription->getIsPatreon())) : ?>
+                                    This costs <strong>$<?= number_format($subscription->getPayment(), 2) ?></strong> per month, due on the first of each month.
+                                    <?php if($subscription->getProfileHistoricalFee() > 0) :
+                                            if($subscription->getIsHistoricalPaid()) : ?>
+                                                You <strong>have</strong> paid the fee to see all past content on this profile,
+                                                so you should be able to see everything available to your tier.
+                                        <?php else : ?>
+                                                You <strong>have not</strong> paid the fee to see all past content on this
+                                                profile, so you will only see content available to your tier posted since
+                                                you subscribed.  The historical fee for this profile is
+                                                $<?= number_format($subscription->getProfileHistoricalFee(), 2) ?> if
+                                                you ever change your mind and want to pay it.  Click the
+                                                &quot;Change Support Level&quot; button below to add access to
+                                               past content;
+                                        <?php endif ?>
+                                    <?php endif ?>
+                                <?php elseif($subscription->getIsPatreon()) : ?>
+                                    You manage this subscription through Patreon.
+                                <?php else: ?>
+                                    You no longer support this profile, and you will not be billed for it.
+                                    However, you still have some time left, so enjoy it until the next
+                                    billing date!
+                                <?php endif ?>
+                            <?php else: ?>
+                                <strong>You no longer support this profile.  If you change your mind, click &quot;Change Support Level&quot; below!</strong>
+                            <?php endif ?>
+                        </p>
+                        <div class="row" id="subscription-<?= $subscription->getId() ?>">
+                            &nbsp;
+                        </div>
+                        <p class="text-center">
+                            <a class="btn btn-success" href="<?= $profileUrl ?>">View Profile</a>
+                            <?php if(!$subscription->getIsPatreon()): ?>
+                                <a class="btn btn-success" href="<?= $this->url('profile-support', array('profile' => $subscription->getProfileUrl())); ?>">Change Support Level</a>
+                            <?php endif ?>
+                        </p>
+                    </div>
+                </div>
+            <?php endforeach ?>
+            <?php $this->inlineScript()->captureStart() ?>
+                jQuery('.history-click').click(function() {
+                    return false;
+                });
+            <?php $this->inlineScript()->captureEnd() ?>
+
+        <?php endif ?>
+    </div>
+</div>

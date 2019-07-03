@@ -1,0 +1,112 @@
+<?php if(!is_object($this->user)) : ?>
+    <div class="jumbotron">
+        <p class="text-center">Before you continue, you need to either
+            <a href="<?= $this->url('login') ?>?return=<?= urlencode($this->url('checkout', array('orderId' => $this->orderId))) ?>">Login</a>
+            or
+            <a href="<?= $this->url('signup') ?>?return=<?= urlencode($this->url('checkout', array('orderId' => $this->orderId))) ?>">Sign Up</a>
+        </p>
+        <p class="text-center">Don't worry, we'll return you right back here when you are done.</p>
+    </div>
+<?php elseif($sold): ?>
+    <div class="jumbotron">
+      <p>
+        Thank you for purchasing!
+        You will receive an email receipt.  If you bought streaming for
+        another user, then they will receive a notification as well.
+      </p>
+      <p>
+        We appreciate your support.  Without you, this site wouldn't
+        exist, so thank you!
+      </p>
+      <p class="text-center">
+        <a class="btn btn-default" href="<?= $this->url('stream') ?>">Return to Stream Listing</a>
+      </p>
+    </div>
+<?php elseif(!is_object($this->order)) : ?>
+    <div class="jumbotron">
+        <?= $this->message ?>
+    </div>
+<?php else : ?>
+    <?php if($this->message): ?>
+        <div class="jumbotron">
+            <h2 class="text-danger"><?= $this->message ?></h2>
+        </div>
+    <?php endif ?>
+
+    <h1>Order Summary</h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <td>Item</td>
+          <td>Amount</td>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach($orderItems as $item): ?>
+          <tr>
+            <td>
+              <?= htmlentities($item->getItemTitle()) ?>
+              (<?= htmlentities($item->getProfileTitle()) ?>)
+            </td>
+            <td>
+              $<?= number_format($item->getItemPrice(), 2) ?>
+            </td>
+          </tr>
+        <?php endforeach ?>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="text-right"><strong>Total:</strong></td>
+          <td><strong>$<?= number_format($order->getTotalPrice(), 2) ?></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+
+    <h4 class="text-center">
+        Want to make a change?
+        <a href="<?= $this->url('order') ?>">Click here to go back and change your stream level!</a>
+    </h4>
+    <div class="jumbotron text-center">
+        <?php if(count($this->paymentMethods)) : ?>
+            <?php foreach($this->paymentMethods as $method) : ?>
+                <?php if($method->getPaymentMethodId() == 1) : // stripe
+                    $customerInfo = \Stripe\Customer::retrieve($method->getMetadata());
+
+                    // Show cards, if we have any.
+                    if(count($customerInfo->sources->data)) : ?>
+
+                    <form action="<?= $this->url('checkout', array('orderId' => $this->order->getId())) ?>" method="POST">
+                        <h3>Stripe Cards</h3>
+                        <ul class="no-bullets text-left">
+                            <?php foreach($customerInfo->sources->data as $card) : ?>
+                                <li><input name="stripeCard" type="radio" value="<?= $card->id ?>" /> <?= $card->brand ?> (**** **** **** <?=$card->last4 ?>) expiring <?= $card->exp_month ?>/<?= $card->exp_year ?></li>
+                            <?php endforeach ?>
+                        </ul>
+                        <input class="btn btn-success btn-large" type="submit" name="act" value="Use Existing Card" />
+                        <p>&nbsp;</p>
+                    </form>
+                    <?php endif ?>
+                <?php endif ?>
+            <?php endforeach ?>
+        <?php endif ?>
+
+        <form action="<?= $this->url('checkout', array('orderId' => $this->order->getId())) ?>" method="POST">
+          <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="<?= $this->stripePublishKey ?>"
+            data-image="/img/swaggerdile.png"
+            data-name="Tigerdile"
+            data-description="Streaming for Artists!"
+            <?php if($order->getTotalPrice() > 0): ?>
+                data-amount="<?= $order->getTotalPrice()*100 ?>"
+            <?php endif ?>
+            data-locale="auto"
+            data-panel-label="Pay {{amount}}"
+            data-email="<?= $this->user->getUserEmail() ?>"
+            data-label="Add a New Card">
+          </script>
+        </form>
+    </div>
+
+<?php endif ?>

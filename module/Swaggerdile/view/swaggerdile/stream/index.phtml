@@ -1,0 +1,346 @@
+<?php
+    // This is used in various places.
+    $isUserLoggedIn = ($this->user && (is_object($this->user)));
+
+    // Add our JS
+    $this->inlineScript()->appendFile('https://api.tigerdile.com/static/api.js')
+                         ->appendFile($this->basePath('js/image-popout.js'))
+                         ->appendFile($this->basePath('js/td-tablesort.js'));
+
+    $this->inlineScript()->captureStart();
+
+    // Get subscriptions
+    $subscriptions = array();
+
+    if($isUserLoggedIn) {
+        $subscriptions = $this->user->getSubscribedStreams();
+    }
+
+?>
+var numViewers = 0;
+var subscriptions = <?= json_encode($subscriptions); ?>;
+
+// Toggle the favorite on or off
+function toggleFav(id, ele) {
+    idStr = "" + id;
+
+    if(subscriptions[idStr]) { // delete
+        jQuery.ajax({
+            async: true,
+            url: '<?= $this->url('rest', array('action' => 'removefavorite')) ?>',
+            data: {channelId: id},
+            dataType: 'json',
+            method: 'POST',
+            success: function(data) {
+                        if(data["status"]) {
+                            subscriptions[idStr] = false;
+                            jQuery(ele).attr('src', '<?= $this->basePath('img/starempty.png') ?>');
+                        }
+                    }
+        });
+    } else {
+        jQuery.ajax({
+            async: true,
+            url: '<?= $this->url('rest', array('action' => 'addfavorite')) ?>',
+            data: {channelId: id},
+            dataType: 'json',
+            method: 'POST',
+            success: function(data) {
+                        if(data["status"]) {
+                            subscriptions[idStr] = true;
+                            jQuery(ele).attr('src', '<?= $this->basePath('img/starfull.png') ?>');
+                        }
+                    }
+        });
+    }
+}
+
+// Push a data row onto the table
+function pushRow(stream, val, className) {
+    var html = '<tr>';
+
+    <?php if($isUserLoggedIn) : ?>
+        if(subscriptions["" + val['id']]) {
+            html = html  + '<td class="fav"><img src="<?= $this->basePath('/img/starfull.png') ?>" onclick="toggleFav(' + val['id'] + ', this); return false;" /></td>';
+        } else {
+            html = html  + '<td class="fav"><img src="<?= $this->basePath('/img/starempty.png') ?>" onclick="toggleFav(' + val['id'] + ', this); return false;" /></td>';
+        }
+    <?php endif; ?>
+
+    // check sfw
+    if(val['sfw']) {
+        html = html + '<td class="sfw issfw">SFW</td>';
+    } else {
+        html = html + '<td class="sfw isnsfw">NSFW</td>';
+    }
+
+    if(val['online']) {
+        html = html + '<td class="streamviewers">' + val['viewers'] + '</td>';
+    }
+
+    // Icon box
+    html = html + '<td class="iconbox">';
+
+    // ONly have preview for online
+    if(val['online']) {
+        html = html + '<a class="preview-click" rel="' + val['preview'] + '" href="#"><span class="glyphicon glyphicon-search" title="Click for Preview"></span></a>';
+    }
+
+    // Do we have a multi stream?
+    var isMulti = val['multi'] && jQuery.isArray(val['multi']) && val['multi'].length;
+
+    if(isMulti) {
+        html = html + ' <span class="glyphicon glyphicon-link" title="Multistream"></span>';
+
+        // Only watch single stream?
+        html = html + ' <a href="' + val['url'] + '?single=1"><span class="glyphicon glyphicon-modal-window" title="View Only This Stream"></span></a>';
+    }
+
+    html = html + "</td>";
+
+    if(className) {
+        html = html + '<td class="' + className + '">';
+    } else {
+        html = html + '<td>';
+    }
+
+    html = html + '<a class="screenshot" href="' + val['url'] + '" rel="' + val['preview'] + '?refresh=' + Math.floor((Math.random()*100000000)+1) + '">';
+
+    // level 3 subscribers might have an image.
+    if((val['account_level'] > 2) && val['vip_image']) {
+        html = html + '<img width="700" height="30" src="' + val['vip_image'] + '" />';
+    } else {
+        html = html + val['name'];
+
+        if(val['stream_blurb']) {
+            html = html + ' - ' + val['stream_blurb'];
+        }
+    }
+
+    html = html + '</a></td></tr>';
+    stream.append(html);
+}
+
+function queryChannels() {
+    <?php if(!$this->userIsAdult) : ?>
+    TigerdileAPI.video.fetch({online: true, sfw: true}, function(data) {
+    <?php else : ?>
+    TigerdileAPI.video.fetch({online: true}, function(data) {
+    <?php endif ?>
+        var onlineStreams = jQuery('#onlineTable tbody');
+        var totalViewers = 0;
+        var totalStreams = 0;
+        onlineStreams.empty();
+
+        jQuery.each(data, function(key, val) {
+            // Process subscription level 3 first
+            if(val['account_level'] < 3) {
+                return true;
+            }
+
+            totalViewers = totalViewers + val['viewers'];
+            totalStreams++;
+            pushRow(onlineStreams, val, 'premium');
+        });
+
+        jQuery.each(data, function(key, val) {
+            if(val['account_level'] > 2) {
+                return true;
+            }
+
+            totalViewers = totalViewers + val['viewers'];
+            totalStreams++;
+            pushRow(onlineStreams, val, 'standard');
+        });
+
+        if(!onlineStreams.children().length) {
+            <?php if($isUserLoggedIn) : ?>
+                onlineStreams.append('<tr><td colspan="4">None online!</td></tr>');
+            <?php else: ?>
+                onlineStreams.append('<tr><td colspan="3">None online!</td></tr>');
+            <?php endif ?>
+        }
+
+        screenshotPreview();
+
+        var footHtml = '<tr>';
+
+        <?php if($isUserLoggedIn) : ?>
+            footHtml = footHtml + '<td>&nbsp;</td>';
+        <?php endif ?>
+        footHtml = footHtml + '<td>&nbsp;</td><td>' + totalViewers + '</td><td colspan="2">in ';
+        footHtml = footHtml + totalStreams + " stream";
+
+        if(totalStreams != 1) {
+            footHtml = footHtml + 's';
+        }
+
+        footHtml = footHtml + '</td></tr>';
+
+        jQuery("#onlineTable tfoot").empty().append(footHtml);
+
+        var myTable = jQuery('#onlineTable');
+        myTable.get(0).resort(myTable);
+
+        setTimeout(queryChannels, 15000);
+    });
+}
+
+function queryOffline() {
+    TigerdileAPI.video.fetch({online: false}, function(data) {
+        var offlineStreams = jQuery('#offlineTable tbody');
+        offlineStreams.empty();
+
+        jQuery.each(data, function(key, val) {
+            // Process subscription level 3 first
+            if(val['account_level'] < 3) {
+                return true;
+            }
+
+            pushRow(offlineStreams, val, 'premium');
+        });
+
+        jQuery.each(data, function(key, val) {
+            if(val['account_level'] > 2) {
+                return true;
+            }
+
+            pushRow(offlineStreams, val, 'standard');
+        });
+
+        if(!offlineStreams.children().length) {
+            <?php if($isUserLoggedIn) : ?>
+                offlineStreams.append('<tr><td colspan="3">None offline!</td></tr>');
+            <?php else : ?>
+                offlineStreams.append('<tr><td colspan="2">None offline!</td></tr>');
+            <?php endif ?>
+        }
+
+        var myTable = jQuery('#offlineTable');
+        myTable.get(0).resort(myTable);
+    });
+}
+
+jQuery(document).ready(function() {
+    // Set custom sort functions
+    jQuery('th.fav').each(function() {
+        this['sortFunction'] = function(a, b) {
+            var isFavA = (jQuery('td.sorted', a).html().indexOf('starfull') >= 0);
+            var isFavB = (jQuery('td.sorted', b).html().indexOf('starfull') >= 0);
+
+            if((!isFavB) && isFavA) {
+                return 1;
+            } else if (isFavB == isFavA) {
+                return 0;
+            } else {
+                return -1;
+            }
+        };
+    });
+
+    jQuery('th.streaminfo').each(function() {
+        this['sortFunction'] = function(a, b) {
+            var tdA = jQuery('td.sorted', a);
+            var tdB = jQuery('td.sorted', b);
+
+            // Check premium
+            if(tdA.hasClass('premium') && (!tdB.hasClass('premium'))) {
+                return 1;
+            } else if(tdB.hasClass('premium') && (!tdA.hasClass('premium'))) {
+                return -1;
+            } else {
+                return tdB.find('a').text().localeCompare(tdA.find('a').text());
+            }
+        };
+    });
+
+    jQuery('#onlineTable,#offlineTable').tablesort();
+    jQuery('th.streaminfo a').addClass('active');
+    queryChannels();
+});
+
+
+<?php
+    $this->inlineScript()->captureEnd();
+?>
+<div class="row">
+<?php /* No longer offering services to new folks
+  <div class="col-md-12">
+    <div class="panel panel-info">
+      <div class="panel-body">
+        <h4>Want to stream?
+            <a href="<?= $this->url('getting-started') ?>">
+             Click here to get started!
+            </a>
+        </h4>
+        <em>First 30 days are free!</em>
+      </div>
+    </div>
+  </div>
+</div>
+*/ ?>
+<div class="col-md-12">
+  <h5 class="clearfix text-center">
+    The stream listing refreshes every 15 seconds.
+  </h5>
+  <h5 class="clearfix text-center">
+    Clicking the star will sign you up for email alerts if that streamer
+    chooses to send them (not all of them do!)
+  </h5>
+</div>
+<div class="row">
+  <div class="col-md-12 table-responsive">
+    <h3>Online Streams - 
+        <?php if($this->userIsAdult) : ?>
+          <a href="<?= $this->url('sfw') ?>?returnUrl=<?= urlencode($this->url('stream')) ?>">Turn on SFW Mode</a>
+        <?php else: ?>
+          <a href="<?= $this->url('adult') ?>?returnUrl=<?= urlencode($this->url('stream')) ?>">See NSFW Streams</a>
+        <?php endif ?>
+    </h3>
+    <table id="onlineTable" class="table">
+      <thead>
+        <tr>
+          <?php if($isUserLoggedIn) : ?>
+            <th class="fav">Fav'd</th>
+          <?php endif ?>
+          <th class="sfw">SFW?</th>
+          <th class="streamviewers">Viewers</th>
+          <th class="iconbox"></th>
+          <th class="streaminfo">Stream Info - Mouse Over or Click <span class="glyphicon glyphicon-search"></span> for Preview</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="<?= $isUserLoggedIn ? '5' : '4' ?>">Loading...!</td>
+        </tr>
+      </tbody>
+      <tfoot></tfoot>
+    </table>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12 table-responsive">
+    <h3>Offline Streams</h3>
+    <table class="table" id="offlineTable">
+      <thead>
+        <tr>
+          <?php if($isUserLoggedIn) : ?>
+            <th class="fav">Fav'd</th>
+          <?php endif ?>
+          <th class="sfw">SFW?</th>
+          <th class="iconbox"></th>
+          <th class="streaminfo">Stream Info</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="<?= $isUserLoggedIn ? '4' : '3' ?>">
+            <a href="#" id="offlineBrowse" onclick="queryOffline(); return false;">
+              Offline streams are not loaded by default.  Click to load the list!
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

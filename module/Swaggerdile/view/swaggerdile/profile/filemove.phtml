@@ -1,0 +1,26 @@
+<span class="featherlight-close-icon featherlight-close">X</span>
+<form method="post" action="<?= $this->serverUrl(true) ?>">
+    <input name="return" type="hidden" value="<?= htmlentities($returnUrl) ?>" />
+    <?php
+        $nameList = array();
+    
+        foreach($files as $file):
+            $nameList[] = htmlentities($file->getTitle()); ?>
+        <input name="selectedFiles[]" value="<?= $file->getId() ?>" type="hidden" />
+    <?php endforeach ?>
+    <h3>You're going to move the following files:</h3>
+    <p><?= implode(', ', $nameList) ?></p>
+
+    <div class="form-group">
+        <label for="folderId">Select a Folder</label>
+        <select class="form-control" name="folderId">
+            <?php foreach($folders as $id => $folder): ?>
+                <option value="<?= $id ?>"><?= $folder ?></option>
+            <?php endforeach ?>
+        </select>
+    </div>
+    <p class="text-center">
+        <input class="btn btn-success btn-large" type="submit" name="act" value="Move" />
+        <a class="btn btn-success btn-large featherlight-close">Cancel</a>
+    </p>
+</form>

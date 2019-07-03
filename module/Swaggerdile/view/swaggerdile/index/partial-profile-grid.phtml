@@ -1,0 +1,32 @@
+<div class="row" id="profile-grid">
+    <?php
+        $numProfiles = count($profiles);
+
+        for($i = 0; ($i < $pageSize) && ($i < $numProfiles); $i++) :
+            $profile = $profiles[$i];
+            $profileUrl = $this->url('profiles', array('profile' => $profile->getUrl()));
+        ?>
+        <div class="col-md-4 profile-cell">
+            <div class="profile-image">
+                <a href="<?= $profileUrl ?>">
+                    <?php if(strlen($url = \Swaggerdile\Media::getProfileIcon($profile))) : ?>
+                        <img width="280" height="200" src="<?= $url ?>" />
+                    <?php else : ?>
+                        Profile image not yet set!
+                    <?php endif ?>
+                </a>
+            </div>
+            <div class="profile-text">
+                <div class="profile-explain pull-left">
+                    <h4><a href="<?= $profileUrl ?>"><?= $profile->getTitle() ?></a></h4>
+                    <h5>By <?= $profile->getDisplayName() ?></h5>
+                </div>
+                <div class="profile-amount pull-right">
+                    $<?= number_format($profile->getCurrentFunding(), 0) ?>
+                    <br />
+                    <span>Per Month</span>
+                </div>
+            </div>
+        </div>
+    <?php endfor ?>
+</div>

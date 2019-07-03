@@ -1,0 +1,1114 @@
+<?php
+    $this->headLink()->appendStylesheet($this->basePath('css/summernote.css'));
+    $this->inlineScript()->appendFile($this->basePath('js/summernote.min.js'));
+?>
+<style>
+  label {
+    color: #aaffaa;
+  }
+
+  p.help-block {
+    font-style: italic;
+  }
+
+  div.form-group ul li {
+    color: #ff0000;
+  }
+</style>
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/dashboard/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">    
+
+<?php if($stream->getIsTigerdileFriend()) : ?>
+  <div class="panel panel-info">
+    <div class="panel-heading text-center">
+      You're a friend of Tigerdile and don't have to pay.
+      We won't ask what you did to deserve this, but we're sure
+      it's unseemly.
+    </div>
+  </div>
+<?php else: $ts = $stream->getDueTimestamp(); if($ts < time()): ?>
+  <div class="panel panel-danger">
+    <div class="panel-heading text-center">
+      Your stream has expired!
+      <a href="<?= $this->url('order') ?>" target="_blank">Click here to renew!</a>
+    </div>
+  </div>
+<?php else: ?>
+  <div class="panel panel-info">
+    <div class="panel-heading text-center">
+      Your stream is in good standing, hooray!
+      Your next payment is due: <?= date('Y-m-d', $ts) ?>
+    </div>
+  </div>
+<?php endif; endif; ?>
+<form enctype="multipart/form-data" method="post" action="<?= $this->url('stream/detail/edit', array('stream' => $stream->getUrl())) ?>">
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="<?= $openTab == 'settings' ? 'active' : '' ?>">
+      <a href="#stream-settings" aria-controls="stream-settings"
+         role="tab" data-toggle="tab">Stream Settings</a>
+    </li>
+    <li role="presentation" class="<?= $openTab == 'appearance' ? 'active' : '' ?>">
+      <a href="#appearance" aria-controls="appearance"
+         role="tab" data-toggle="tab">Appearance</a>
+    </li>
+    <li role="presentation" class="<?= $openTab == 'subscribers' ? 'active' : '' ?>">
+      <a href="#subscribers" aria-controls="subscribers"
+         role="tab" data-toggle="tab">Subscribers</a>
+    </li>
+    <li role="presentation" class="<?= $openTab == 'chat' ? 'active' : '' ?>">
+      <a href="#chat" aria-controls="chat"
+         role="tab" data-toggle="tab">Chat Settings</a>
+    </li>
+    <li role="presentation" class="<?= $openTab == 'multistream' ? 'active' : '' ?>">
+      <a href="#multistream" aria-controls="multistream"
+         role="tab" data-toggle="tab">Multi-Stream</a>
+    </li>
+    <li role="presentation" class="<?= $openTab == 'rebroadcast' ? 'active' : '' ?>">
+      <a href="#rebroadcast" aria-controls="rebroadcast"
+         role="tab" data-toggle="tab">Rebroadcast</a>
+    </li>
+  </ul>
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'settings' ? 'active' : '' ?>" id="stream-settings">
+      <?= $this->partial('swaggerdile/stream/partial-streamconfig.phtml',
+                        array('stream' => $stream)) ?>
+      <div class="form-group">
+        <label for="title"><?= $form->get('title')->getLabel() ?></label>
+        <p class="help-block">This is the title of your Stream Page.</p>
+        <?= $this->FormElement($form->get('title')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('title')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('stream_blurb')->getLabel() ?></label>
+        <p class="help-block">
+          A short description that is displayed on the stream listing
+          (Your "Stream Info" column).
+        </p>
+        <?= $this->FormElement($form->get('stream_blurb')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('stream_blurb')); ?>
+      </div>
+
+      <?php if($stream->getStreamTypeId() >= 3): ?>
+        <div class="form-group">
+          <label for="vipImage"><?= $form->get('vipImage')->getLabel() ?></label>
+          <p class="help-block">
+            This is a 700 pixel wide by 30 pixel tall "VIP Image" that shows
+            in place of your stream blurb on the stream list.
+          </p>
+          <?= $this->FormElement($form->get('vipImage')) ?>
+          <?= $this->FormElementErrors($form->get('vipImage')); ?>
+          <?php if(array_key_existS('vip', $imageErrors)) : ?>
+            <ul>
+              <li><?= $imageErrors['vip'] ?></li>
+            </ul>
+          <?php endif ?>
+        </div>
+        <?php
+          $vipImage = \Swaggerdile\Media::getStreamVIP($stream);
+  
+          if($vipImage): ?>
+          <div class="text-center" id="vipImage">
+            <a href="#" id="delete_vip" class="deleteImage">[Remove Image]</a>
+            <img class="img-responsive" src="<?= $vipImage ?>" />
+          </div>
+        <?php endif ?>
+
+      <?php endif ?>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('url')->getLabel() ?></label>
+        <p class="help-block">
+          To reach your stream, your viewers will go to:
+          https://<strong>StreamURL</strong>.tigerdile.com
+          where "<strong>StreamURL</strong>" is whatever you put in
+          this field.  It can be letters, numbers, and dashes only.
+        </p>
+        <?= $this->FormElement($form->get('url')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('url')); ?>
+        <?php if($urlFailure): ?>
+          <ul>
+            <li>This URL is in use by another stream.  Pick another, please!</li>
+          </ul>
+        <?php endif ?>
+      </div>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('rtmp_password')->getLabel() ?></label>
+        <p class="help-block">
+          This is the password you will use to start broadcasting.
+          This is NOT a secure password, so please use a simple password that
+          you don't use anywhere else.
+        </p>
+        <?= $this->FormElement($form->get('rtmp_password')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('rtmp_password')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('viewer_password')->getLabel() ?></label>
+        <p class="help-block">
+          If you want to stream privately, you can set a password your viewers
+          must use to view your stream.  This is optional.
+        </p>
+        <?= $this->FormElement($form->get('viewer_password')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('viewer_password')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="title"><?= $form->get('is_nsfw')->getLabel() ?></label>
+        <p class="help-block">
+          This is the rating of your stream.  "Safe for work" means your
+          stream is safe for viewers of all ages.  "Not safe for work" means
+          your stream is for adults only.
+        </p>
+        <?= $this->FormElement($form->get('is_nsfw')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('is_nsfw')); ?>
+      </div>
+
+      <div class="form-group text-center">
+        <input type="submit" name="act-settings" value="Save" class="btn btn-default" />
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'appearance' ? 'active' : '' ?>" id="appearance">
+      <div class="form-group">
+        <label for="above_stream_html"><?= $form->get('above_stream_html')->getLabel() ?></label>
+        <p class="help-block">
+          This will show up above your stream video.  Note that you can drag
+          and drop images into the editor.
+        </p>
+        <?= $this->FormElement($form->get('above_stream_html')) ?>
+        <div id="userContent" class="wysiwyg-box">
+          <?= $form->get('above_stream_html')->getValue() ?>
+        </div>
+        <?= $this->formElement($form->get('above_stream_html')->setAttribute('id', 'content')); ?>
+        <?= $this->FormElementErrors($form->get('above_stream_html')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="aspect_ratio"><?= $form->get('aspect_ratio')->getLabel() ?></label>
+        <p class="help-block">
+          Aspect ratio refers to the shape of your video stream.
+          Tigerdile supports 16:9 (which matches most computer screens)
+          and 4:3 (which is more square, like a TV).
+        </p>
+        <div>
+          <div class="col-md-7">
+            <?= $this->FormElement($form->get('aspect_ratio')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('aspect_ratio')); ?>
+          </div>
+          <div class="col-md-5 text-center">
+            <img style="margin-right: 10px;" src="<?= $this->basePath('img/16-by-9.png') ?>" />
+            <img src="<?= $this->basePath('img/4-by-3.png') ?>" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="offlineImage"><?= $form->get('offlineImage')->getLabel() ?></label>
+        <p class="help-block">
+          When your stream is offline, this image will show.
+          <strong>You must press the Save button to upload an image!</strong>
+        </p>
+        <?= $this->FormElement($form->get('offlineImage')) ?>
+        <?= $this->FormElementErrors($form->get('offlineImage')); ?>
+          <?php if(array_key_existS('offlineImage', $imageErrors)) : ?>
+            <ul>
+              <li><?= $imageErrors['offlineImage'] ?></li>
+            </ul>
+          <?php endif ?>
+      </div>
+      <?php
+        $offlineImage = \Swaggerdile\Media::getStreamOfflineBackground($stream);
+
+        if($offlineImage): ?>
+        <div class="text-center" id="stream-offlineImage">
+          <a href="#" id="delete_stream-offline" class="deleteImage">[Remove Image]</a>
+          <img class="img-responsive" src="<?= $offlineImage ?>" />
+        </div>
+      <?php endif ?>
+
+      <div class="form-group">
+        <label for="below_stream_html"><?= $form->get('below_stream_html')->getLabel() ?></label>
+        <p class="help-block">
+          This will show up below your stream video and below your PayPal
+          donation link if you set that up as well.  Note that you can drag
+          and drop images into the editor.
+        </p>
+        <?= $this->FormElement($form->get('below_stream_html')) ?>
+        <div id="userBelowContent" class="wysiwyg-box">
+          <?= $form->get('below_stream_html')->getValue() ?>
+        </div>
+        <?= $this->formElement($form->get('below_stream_html')->setAttribute('id', 'belowContent')); ?>
+        <?= $this->FormElementErrors($form->get('below_stream_html')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="backgroundImage"><?= $form->get('backgroundImage')->getLabel() ?></label>
+        <p class="help-block">
+          This is the background image for your stream page.  This works best
+          as a small, repeating image (also known as a "tiled" image).
+          <strong>You must press the Save button to upload an image!</strong>
+        </p>
+        <?= $this->FormElement($form->get('backgroundImage')) ?>
+        <?= $this->FormElementErrors($form->get('backgroundImage')); ?>
+          <?php if(array_key_existS('backgroundImage', $imageErrors)) : ?>
+            <ul>
+              <li><?= $imageErrors['backgroundImage'] ?></li>
+            </ul>
+          <?php endif ?>
+      </div>
+
+      <?php
+        $bgImage = \Swaggerdile\Media::getStreamBackground($stream);
+
+        if($bgImage): ?>
+        <div id="stream-backgroundImage" class="text-center">
+          <a href="#" id="delete_stream-background" class="deleteImage">[Remove Image]</a>
+          <img class="img-responsive" src="<?= $bgImage ?>" />
+        </div>
+      <?php endif ?>
+
+      <div class="form-group">
+        <label for="donation_email"><?= $form->get('donation_email')->getLabel() ?></label>
+        <p class="help-block">
+          Tigerdile uses a special donation page so that PayPal won't see
+          your donations are coming from a stream that may have adult
+          content in it, so it is safe to use.  Put your PayPal email here
+          to use our system.  You can leave this empty if you don't want
+          to have a donate button.
+        </p>
+        <?= $this->FormElement($form->get('donation_email')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('donation_email')); ?>
+      </div>
+
+      <div class="form-group">
+        <label for="donateImage"><?= $form->get('donateImage')->getLabel() ?></label>
+        <p class="help-block">
+          If you provide a donation image, we'll use it as the donate button!
+          If you don't, you'll get a generic button.
+          <strong>You must press the Save button to upload an image!</strong>
+        </p>
+        <?= $this->FormElement($form->get('donateImage')) ?>
+        <?= $this->FormElementErrors($form->get('donateImage')); ?>
+          <?php if(array_key_existS('donateImage', $imageErrors)) : ?>
+            <ul>
+              <li><?= $imageErrors['donateImage'] ?></li>
+            </ul>
+          <?php endif ?>
+      </div>
+
+      <?php
+        $donateImage = \Swaggerdile\Media::getStreamDonateButton($stream);
+
+        if($donateImage): ?>
+        <div class="text-center" id="donateImage">
+          <a href="#" id="delete_donate" class="deleteImage">[Remove Image]</a>
+          <img class="img-responsive" src="<?= $donateImage ?>" />
+        </div>
+      <?php endif ?>
+
+      <div class="form-group text-center">
+        <input type="submit" name="act-appearance" value="Save" class="btn btn-default" />
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'subscribers' ? 'active' : '' ?>" id="subscribers">
+      <p>
+        Subscribers are people that you can notify about your streams.
+        Use this page to send them messages, or to modify the list.  You
+        can kick people off your subscription list, or ban them. Banned
+        users will think they are still subscribed, and have no visible
+        way of knowing they are banned.
+      </p>
+      <p>
+        Note banning someone from subscribing does not ban them from
+        chat.  That's a separate action on the 'Chat Settings' tab.
+      </p>
+      <h3 class="text-center">
+        You Have
+        <?= ($subCount = $stream->getSubscriberCount()) ?>
+        Subscriber<?= $subCount != 1 ? 's' : '' ?>
+      </h3>
+      <div id="subscriberManage">
+        <p class="text-center">
+          <a href="#" id="loadSubscribers">Click Here to Load and Manage Subscriber List</a>
+        </p>
+      </div>
+      <h4>Tweet to Your Subscribers</h4>
+      <hr />
+      <div class="form-group">
+        <label for="twitter">Your Tweet</label>
+        <input type="text" name="twitter" class="form-control" maxlength="140"
+               value="I'm streaming on Tigerdile right now!  Come watch at https://<?= $stream->getUrl() ?>.tigerdile.com" />
+      </div>
+      <div class="form-group text-center">
+        <a href="#" id="sendTweet" class="btn btn-default">Send Tweet</a>
+      </div>
+      <h4>Email Your Subscribers</h4>
+      <hr />
+      <div class="form-group">
+        <label for="emailSubject">Subject</label>
+        <input type="text" class="form-control" name="emailSubject" value="<?= $user->getDisplayName() ?> is streaming on Tigerdile!  https://<?= $stream->getUrl() ?>.tigerdile.com" />
+      </div>
+      <div class="form-group">
+        <label for="emailMessage">Message</label>
+        <p class="help-block">
+          We recommend you type up a nice message for your subscribers, telling
+          them what you're doing and what your prices are.  The more you
+          vary your message from stream to stream, the more likely your
+          viewers are to get the message -- form letters tend to wind up
+          in spam!  <strong>Remember to include a link to your stream!</strong>
+        </p>
+        <div id="emailMessage">
+          <p>I'm streaming on Tigerdile right now!</p>
+          <p>Come and watch at:</p>
+          <p><a href="https://<?= $stream->getUrl() ?>.tigerdile.com">https://<?= $stream->getUrl() ?>.tigerdile.com</a>
+          <p>&nbsp;</p>
+        </div>
+      </div>
+      <div class="form-group text-center">
+        <a href="#" id="sendEmail" class="btn btn-default">Send Email</a>
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'chat' ? 'active' : '' ?>" id="chat">
+      <div class="form-group">
+        <label for="is_allow_guests"><?= $form->get('is_allow_guests')->getLabel() ?></label>
+        <p class="help-block">
+          Guests are users that are have not registered on Tigerdile.
+          Their names will show up prefixed with "g." to distinguish them
+          from registered users.  Because registration is easy, and guests
+          are difficult to ban, we recommend leaving this "off" but it is
+          your choice.
+        </p>
+        <?= $this->FormElement($form->get('is_allow_guests')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('is_allow_guests')); ?>
+      </div>
+      <div class="form-group text-center">
+        <input type="submit" name="act-chat" value="Save" class="btn btn-default" />
+      </div>
+      <h4>Moderators</h4>
+      <p>
+        Moderators are users appoointed by you to assist with managing your
+        stream.  Their names show in up <span style="color: #9999ff">blue</span>
+        on the user list and they are able to kick/ban users on your behalf.
+      </p>
+      <?php
+        $mods = $stream->getModerators();
+      ?>
+      <ul id="modlist">
+        <?php foreach($mods as $mod): ?>
+          <li>
+              <?= $mod->getDisplayName() ?>
+              <a href="#" rel="<?= $mod->getId() ?>" class="deleteMod">[Remove]</a>
+          </li>
+        <?php endforeach ?>
+      </ul>
+      <div class="form-group">
+        <label for="addModerator">Add a Moderator</label>
+        <p class="help-block">
+          Type in the chat name of whomever you want to make into a
+          moderator.  You can easily remove moderators later.
+        </p>
+        <input type="text" class="form-control" name="addModerator" placeholder="Type a Chat Username" value="" />
+      </div>
+      <div class="form-group text-center">
+        <a href="#" id="addModerator" class="btn btn-default">Add Moderator</a>
+      </div>
+      <h4>Banned Users</h4>
+      <h5 class="text-danger">
+        Please note: the preferred method to ban a user is to click the
+        Ban button from the user list in the pop out chat.  If you ban
+        a user using this page, it may not take immediate effect; this
+        page is more for removing bans or banning an offline user.
+      </h5>
+      <?php
+        $banned = $stream->getBannedUsers();
+      ?>
+      <ul id="banlist">
+        <?php foreach($banned as $ban): ?>
+          <li>
+            <?= $ban->getDisplayName() ?>
+            <a href="#" rel="<?= $ban->getId() ?>" class="deleteBan">
+              [Remove]
+            </a>
+          </li>
+        <?php endforeach ?>
+      </ul>
+      <div class="form-group">
+        <label for="addBan">Add a Banned User</label>
+        <p class="help-block">
+          Type in the chat name of whomever you want to ban.  You can easily
+          remove banned users later.
+        </p>
+        <input type="text" value="" class="form-control" name="addBan" placeholder="Type a Chat Username" />
+      </div>
+      <div class="form-group text-center">
+        <a href="#" id="addBanned" class="btn btn-default">Add Ban</a>
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'multistream' ? 'active' : '' ?>" id="multistream">
+      <h4>What Is This?</h4>
+      <p>
+        Multi-Streaming is a way to make multiple streams show up on the
+        same page.  This lets you stream with your friends and provide
+        your viewers a fun shared experience!
+      </p>
+      <div id="multistreamControl"></div>
+      <div class="form-group">
+        <label for="pickMulti">Type Username to Stream With</label>
+        <p class="help-block">
+          Type in the chat name of the user you'd like to stream
+          with.
+        </p>
+        <input type="text" value="" name="pickMulti" class="form-control" />
+      </div>
+      <div class="form-group text-center">
+        <a href="#" id="addMulti" class="btn btn-default">Add</a>
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <?= $openTab == 'rebroadcast' ? 'active' : '' ?>" id="rebroadcast">
+      <h4>What Is This?</h4>
+      <p>
+        Rebroadcasting is a way to target more viewers by automatically streaming
+        your Tigerdile stream to multiple sites.  This allows you to use Tigerdile
+        as your primary intake, and then Tigerdile rebroadcasts to other services
+        such as Twitch or Picarto.
+      </p>
+      <p>
+        <strong>Important:</strong> If you like this service, please give us
+        feedback!  We're also open to supporting more sites to rebroadcast to.
+        It's pretty easy, we just don't know what other sites are popular.
+      </p>
+      <hr />
+      <?php if($stream->getStreamTypeId() < 2): ?>
+        <p>
+          This feature is exclusive to our unlimited stream level or above users.
+          The reason why is this takes a good bit of extra system resources, so
+          it costs Tigerdile more to provide this feature.
+        </p>
+        <p>
+          If you'd like to try it out before buying, contact support; we're happy
+          to let you try it out.
+        </p>
+      <?php else: ?>
+        <p>
+          You will automatically brodcast to all sites you set up on this page
+          when you start streaming.
+        </p>
+        <p>
+          <?php if($stream->getStreamTypeId() == 2): $max = 2; ?>
+            As a pro user, you get to re-broadcast to 2 other sites.  If you
+            want to broadcast to more sites, upgrade to our VIP package.
+          <?php else: $max = -1; ?>
+            As a VIP user, you can re-broadcast to as many other sites as
+            you like!
+          <?php endif ?>
+        </p>
+        <?php if(count($rebroadcasts)): ?>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>URL</th>
+                <th>Key</th>
+                <th>Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach($rebroadcasts as $r): ?>
+                <tr>
+                  <td><?= htmlentities($r->getTitle()) ?></td>
+                  <td><?= htmlentities($r->getTargetUrl()) ?></td>
+                  <td><?= htmlentities(substr($r->getStreamKey(), 0, 3)) ?>****</td>
+                  <td class="text-center">
+                      <?php if($r->getIsEnabled()): ?>
+                        <div style="margin-bottom: 10px;">
+                          <input type="submit" name="act-rebroadcast-<?= $r->getId() ?>" value="Disable" class="check-rebroad btn btn-default btn-danger btn-xs" />
+                        </div>
+                      <?php elseif(($max == -1) || (($max > 0) && (count($activeRebroads) < $max))): ?>
+                        <div style="margin-bottom: 10px;">
+                          <input type="submit" name="act-rebroadcast-<?= $r->getId() ?>" value="Enable" class="check-rebroad btn btn-default btn-success btn-xs" />
+                        </div>
+                      <?php endif ?>
+                      <div>
+                        <input type="submit" name="act-rebroadcast-<?= $r->getId() ?>" value="Delete" class="check-rebroad btn btn-default btn-xs" />
+                      </div>
+                  </td>
+                </tr>
+              <?php endforeach ?>
+            </tbody>
+          </table>
+        <?php endif ?>
+        
+        <div class="form-group">
+          <label for="rebroadcast_title">What service to rebroadcast to?</label>
+          <select autocomplete="off" name="rebroadcast_title" id="rebroadcast_title" class="form-control">
+            <option value="">- Pick One -</option>
+            <option value="Picarto">Picarto</option>
+            <option value="Twitch">Twitch</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+        <div class="rebroadcast-Picarto" style="display: none;">
+          <p>In order to broadcast to Picarto, we will need your stream key.
+             You can find it on the
+             <a href="https://picarto.tv/settings/livestreamsetup" target="_blank">Stream Setup Page</a>
+          </p>
+        </div>
+        <div class="rebroadcast-Twitch" style="display: none;">
+          <p>In order to broadcast to Twitch, we will need your stream key.
+             You can find it on the Dashboard; go to Settings, then click
+             Stream key.  Unfortunately, we cannot link straight to
+             Twitch's dashboard.
+          </p>
+        </div>
+        <div class="rebroadcast-Custom" style="display: none;">
+          <p>Most sites use some combination of a stream URL and a stream
+             key.  You can try it for yourself here if you want; if
+             it doesn't work, contact Support and maybe we can add a
+             custom handler for it!
+          </p>
+        </div>
+        <div class="form-group show-custom" style="display: none;">
+          <label for="rebroadcast_url">
+            What URL do you want to rebroadcast to?
+          </label>
+          <input class="form-control" name="rebroadcast_url" />
+        </div>
+        <div class="form-group show-all" style="display: none;">
+          <label for="rebroadcast_key">
+            What is your stream key?
+          </label>
+          <input class="form-control" name="rebroadcast_key" />
+        </div>
+        <div class="form-group show-all text-center" style="display: none;">
+          <input type="submit" name="act-rebroadcast" value="Add" class="check-rebroad btn btn-default" />
+        </div>
+      <?php endif ?>
+    </div>
+  </div>
+</form>
+</div>
+<?php $this->inlineScript()->captureStart(); ?>
+    /*
+     * I'm not sure if we need this or not.  The old editor (the one used
+     * by Swaggerdile's profile) needed it, but so far it looks like
+     * the new editor does not need it.
+     */
+    function addImageClass(ev) {
+        jQuery(this).find('img').addClass('img-responsive');
+    }
+
+    /*
+     * Reload the list of subscribers.  This may be a very large list.
+     *
+     * Due to the nature of how this works, someone can be both
+     * subscribed and banned.  We need to make this case appear
+     * logical.
+     */
+    function loadSubscribers(targetArea)
+    {
+        targetArea.html('<p>Loading...</p>');
+
+        jQuery.ajax({
+            url: '<?= $this->url('rest', array('action' => 'subscribers')) ?>',
+            data: {channelId: <?= $stream->getId() ?>},
+            success: function(data) {
+                // Make 2 lists... banned and not banned.
+                var banned = [];
+                var notBanned = [];
+                var bannedIds = {}
+
+                // Get the banned people FIRST
+                jQuery.each(data, function(k, val) {
+                    if(val.type_id != 3) {
+                        banned.push(val);
+                        bannedIds[val.user_id] = true;
+                    }
+                });
+
+                // get the rest, this time filtering out the banned.
+                jQuery.each(data, function(k, val) {
+                    if(val.type_id == 3 && (!bannedIds[val.user_id])) {
+                        notBanned.push(val);
+                    }
+                });
+
+                targetArea.empty();
+
+                // Construct not-banned HTML
+                if(notBanned.length) {
+                    targetArea.append('<h4 class="text-center">Subscribers</h4>');
+                    var newList = jQuery('<ul />');
+
+
+                    jQuery.each(notBanned, function(k, val) {
+                        var newLi = jQuery('<li />');
+                        newLi.text(val.display_name);
+
+                        var newA = jQuery('<a href="#" class="banSubscriber" />');
+                        newA.text(' [Ban]');
+                        newA.attr('rel', val.user_id);
+                        newLi.append(newA);
+
+                        newList.append(newLi);
+                    });
+
+                    targetArea.append(newList);
+                }
+
+                // Construct banned HTML.  If I cared, I would condense this
+                // with the above because it's copypasta .. but I don't care
+                // enough right now :)
+                if(banned.length) {
+                    targetArea.append('<h4 class="text-center">Banned Subscribers</h4>');
+                    var newList = jQuery('<ul />');
+
+
+                    jQuery.each(banned, function(k, val) {
+                        var newLi = jQuery('<li />');
+                        newLi.text(val.display_name);
+
+                        var newA = jQuery('<a href="#" class="unbanSubscriber" />');
+                        newA.text(' [Unban]');
+                        newA.attr('rel', val.user_id);
+                        newLi.append(newA);
+
+                        newList.append(newLi);
+                    });
+
+                    targetArea.append(newList);
+                }
+            }
+        });
+    }
+
+    jQuery(document).ready(function() {
+        // Set up the summernote editor.
+        jQuery('#userContent, #userBelowContent, #emailMessage').summernote({
+            toolbar: [
+                [
+                    'Style',
+                    [
+                        'bold', 'italic', 'underline', 'strikethrough', 'clear'
+                    ]
+                ],
+                [
+                    'Font',
+                    [
+                        'fontsize',
+                        'color'
+                    ]
+                ],
+                [
+                    'Paragraph',
+                    [
+                        'style',
+                        'ol',
+                        'ul',
+                        'paragraph',
+                        'height'
+                    ]
+                ],
+                [
+                    'Insert',
+                    [
+                        'picture',
+                        'link',
+                        'table',
+                        'hr'
+                    ]
+                ],
+                [
+                    'Misc',
+                    [
+                        'undo',
+                        'redo',
+                        'help'
+                    ]
+                ]
+            ]
+        });
+
+        jQuery('form').submit(function() {
+            // Copy summernote into hidden fields.
+            jQuery('input#content').val(jQuery('#userContent').summernote('code'));
+            jQuery('input#belowContent').val(jQuery('#userBelowContent').summernote('code'));
+            jQuery('input#aboveContent').val(jQuery('#userAboveContent').summernote('code'));
+            return true;
+        });
+
+        jQuery('a.deleteImage').click(function(ev) {
+            // basic AJAX callback for deleting image.
+            ev.preventDefault();
+            var type = jQuery(this).attr('id').substring(7);
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'deletePublicImage')) ?>',
+                data: {type: type, profileId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    jQuery('#' + type + 'Image').remove();
+                }
+            });
+
+            return false;
+        });
+
+        jQuery('#loadSubscribers').click(function(ev) {
+            // Basic ajax handler for loading subscriber list.
+            ev.preventDefault();
+            var targetArea = jQuery('#subscriberManage');
+            loadSubscribers(targetArea);
+            return false;
+        });
+
+        jQuery('#subscriberManage').on('click', '.banSubscriber', function(ev) {
+            // Support for ban buttons
+            ev.preventDefault();
+            var userId = jQuery(this).attr('rel');
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'bansubscriber')) ?>',
+                data: {userId: userId, channelId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    if(data['status']) {
+                        var targetArea = jQuery('#subscriberManage');
+                        loadSubscribers(targetArea);
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        jQuery('#subscriberManage').on('click', '.unbanSubscriber', function(ev) {
+            // support for unban buttons
+            ev.preventDefault();
+            var userId = jQuery(this).attr('rel');
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'unbansubscriber')) ?>',
+                data: {userId: userId, channelId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    if(data['status']) {
+                        var targetArea = jQuery('#subscriberManage');
+                        loadSubscribers(targetArea);
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        jQuery('#sendEmail').click(function(ev) {
+            ev.preventDefault();
+
+            // Do error check.
+            var subject = jQuery('input[name="emailSubject"]').val().trim();
+            var email = jQuery('#emailMessage').summernote('code').trim();
+
+            if((!subject.length) || (!email.length)) {
+                alert('Subject and email are both required.');
+                return false;
+            }
+
+            // Send it!
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'email')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, subject: subject, email: email},
+                async: false,
+                method: 'POST',
+                success: function(data) {
+                    if(data['status']) {
+                        var parent = jQuery('#sendEmail').parent();
+                        jQuery('#sendEmail').remove();
+                        parent.append("<p>Email sent!</p>");
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        // Add a moderator
+        jQuery('#addModerator').click(function(ev) {
+            ev.preventDefault();
+            var modName = jQuery('input[name="addModerator"]').val();
+
+            if(!modName.length) {
+                alert('You must provide a moderator name.');
+                return false;
+            }
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'addmoderator')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, user: modName},
+                async: false,
+                method: 'POST',
+                success: function(data) {
+                    if(!data['status']) {
+                        alert('Could not find the moderator user.');
+                    } else {
+                        jQuery('input[name="addModerator"]').val('');
+                        var mods = jQuery('#modlist');
+                        var newLi = jQuery('<li />');
+                        newLi.text(modName);
+                        newLi.append('<a href="#" class="deleteMod" rel="' + data['user_id'] + '"> [Remove]</a>');
+                        mods.append(newLi);
+                    }
+                },
+                error: function() {
+                    alert('Could not find that moderator user.');
+                }
+            });
+
+            return false;
+        });
+
+
+        // Ban a luser
+        jQuery('#addBanned').click(function(ev) {
+            ev.preventDefault();
+            var modName = jQuery('input[name="addBan"]').val();
+
+            if(!modName.length) {
+                alert('You must provide a user to ban.');
+                return false;
+            }
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'addchatban')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, user: modName},
+                async: false,
+                method: 'POST',
+                success: function(data) {
+                    if(!data['status']) {
+                        alert('Could not find the user to ban.');
+                    } else {
+                        jQuery('input[name="addBan"]').val('');
+                        var mods = jQuery('#banlist');
+                        var newLi = jQuery('<li />');
+                        newLi.text(modName);
+                        newLi.append('<a href="#" class="deleteBan" rel="' + data['user_id'] + '"> [Remove]</a>');
+                        mods.append(newLi);
+                    }
+                },
+                error: function() {
+                    alert('Could not find that user to ban.');
+                }
+            });
+
+            return false;
+        });
+
+        // Remove moderator
+        jQuery('#modlist').on('click', '.deleteMod', function(ev) {
+            ev.preventDefault();
+
+            var thisLi = jQuery(this).parent('li');
+            var userId = jQuery(this).attr('rel');
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'deletemoderator')) ?>',
+                data: {userId: userId, channelId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    if(data['status']) {
+                        thisLi.remove();
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        // Remove moderator
+        jQuery('#banlist').on('click', '.deleteBan', function(ev) {
+            ev.preventDefault();
+
+            var thisLi = jQuery(this).parent('li');
+            var userId = jQuery(this).attr('rel');
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'deletechatban')) ?>',
+                data: {userId: userId, channelId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    if(data['status']) {
+                        thisLi.remove();
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        // Load up the multi-user display.
+        function loadMultiuser()
+        {
+            var msControl = jQuery('#multistreamControl');
+            msControl.empty();
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'getmultistream')) ?>',
+                data: {channelId: <?= $stream->getId() ?> },
+                success: function(data) {
+                    if(data['status']) {
+                        if(!data['streams'].length) {
+                            return;
+                        }
+
+                        var ul = jQuery('<ul />');
+
+                        jQuery.each(data['streams'], function(k, stream) {
+                            var li = jQuery('<li />');
+                            li.text(stream['name'] + ' ');
+                            var a = jQuery('<a href="#" class="removeMulti">[Remove]</a>');
+                            a.attr('rel', stream['id']);
+                            li.append(a);
+                            ul.append(li);
+                        });
+
+                        msControl.append(ul);
+
+                        var selectBox = jQuery('<select name="whosChat" class="form-control" />');
+                        var selected = data['multistream_chat_option'];
+
+                        selectBox.append('<option value="0">Show Everyone\'s Chat</option>');
+                        selectBox.append('<option value="<?= $stream->getId() ?>">Just Your Chat</option>');
+
+                        jQuery.each(data['streams'], function(k, stream) {
+                            var option = jQuery('<option />');
+                            option.attr('value', stream['id']);
+                            option.text('Share chat with: ' + stream['name']);
+                            selectBox.append(option);
+                        });
+
+                        if(selected) {
+                            selectBox.val(selected);
+                        } else {
+                            selectBox.val("0");
+                        }
+
+                        msControl.append(selectBox);
+                    }
+                }
+            });
+        }
+
+        // Add multi-stream user
+        jQuery('#addMulti').click(function(ev) {
+            ev.preventDefault();
+            var streamWith = jQuery('input[name="pickMulti"]').val();
+
+            if(!streamWith.length) {
+                alert('You must type in a username to stream with.');
+                return false;
+            }
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'addmultistream')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, user: streamWith},
+                method: 'POST',
+                success: function(data) {
+                    if(data['status']) {
+                        jQuery('input[name="pickMulti"]').val('');
+                        loadMultiuser();
+                    }
+                },
+                error: function() {
+                    alert('That is not a valid user to stream with.');
+                }
+            });
+
+            return false;
+        });
+
+        jQuery('#multistreamControl').on('click', '.removeMulti', function(ev) {
+            ev.preventDefault();
+
+            var toDelete = jQuery(this).attr('rel');
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'deletemultistream')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, profile: toDelete},
+                method: 'POST',
+                success: function(data) {
+                    if(data['status']) {
+                        loadMultiuser();
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        jQuery('#multistreamControl').on('change', 'select[name="whosChat"]', function(ev) {
+            // Pick chat
+            var pickedChat = jQuery(this).val();
+
+            jQuery.ajax({
+                url: '<?= $this->url('rest', array('action' => 'setmultichat')) ?>',
+                data: {channelId: <?= $stream->getId() ?>, profile: pickedChat},
+                method: 'POST',
+                success: function(data) {
+                    if(data['status']) {
+                        loadMultiuser();
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        loadMultiuser();
+
+        jQuery('#rebroadcast_title').change(function() {
+            var type = jQuery(this).val();
+
+            jQuery('.show-all,.show-custom,.rebroadcast-Picarto,.rebroadcast-Twitch,.rebroadcast-Custom').hide();
+            jQuery('input[name="rebroadcast_url"]').val('');
+            jQuery('input[name="rebroadcast_key"]').val('');
+
+            if(type.length) {
+                jQuery('.show-all,.rebroadcast-' + type).show();
+
+                if(type == 'Custom') {
+                    jQuery('.show-custom').show();
+                } else {
+                    jQuery('.show-custom').hide();
+
+                    // TODO: This is kind of a lame hardcode
+                    if(type == 'Picarto') {
+                        jQuery('input[name="rebroadcast_url"]').val('rtmp://live.us-east1.picarto.tv/golive');
+                    } else {
+                        jQuery('input[name="rebroadcast_url"]').val('rtmp://live-dfw.twitch.tv/app');
+                    }
+                }
+            }
+        });
+
+        jQuery('.check-rebroad').click(function(ev) {
+            if(jQuery('select[name="rebroadcast_title"]').val().length &&
+               (!jQuery('input[name="rebroadcast_url"]').val().length)) {
+                alert('Rebroadcast URL is required.');
+                ev.preventDefault();
+                return false;
+            }
+
+            return true;
+        });
+
+        jQuery('#sendTweet').click(function(ev) {
+            ev.preventDefault();
+
+            var target = "https://twitter.com/intent/tweet?text=" +
+                         encodeURIComponent(jQuery('input[name="twitter"]').val());
+
+            window.open(target, '_blank');
+        });
+    });
+<?php $this->inlineScript()->captureEnd();

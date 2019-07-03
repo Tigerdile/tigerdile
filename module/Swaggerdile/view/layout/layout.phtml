@@ -1,0 +1,103 @@
+<?php echo $this->doctype(); ?>
+<html lang="en">
+<?php
+  $isLoggedIn = isset($user) && is_object($user);
+?>
+  <head>
+    <meta charset="utf-8">
+    <?php echo $this->headTitle($this->translate('Tigerdile Streaming'))->setAutoEscape(false) ?>
+
+    <?php echo $this->headMeta()
+      ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+      ->appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+    ?>
+
+    <!-- Le styles -->
+    <?php echo $this->headLink(array('rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/img/favicon.ico'))
+        ->prependStylesheet($this->basePath('css/style.css'))
+        ->prependStylesheet($this->basePath('css/jquery-ui.min.css'))
+        ->prependStylesheet($this->basePath('css/bootstrap.min.css'))
+        ->prependStylesheet($this->basePath('css/font-awesome.min.css'))  ?>
+
+    <!-- Scripts -->
+    <?php echo $this->headScript()
+      ->prependFile($this->basePath('js/bootstrap.min.js'))
+      ->prependScript('jQuery.widget.bridge("uibutton", jQuery.ui.button); jQuery.widget.bridge("uitooltip", jQuery.ui.tooltip);')
+      ->prependFile($this->basePath('js/jquery-ui.min.js'))
+      ->prependFile($this->basePath('js/jquery.min.js'))
+      ->prependFile($this->basePath('js/respond.min.js'), 'text/javascript', array('conditional' => 'lt IE 9',))
+      ->prependFile($this->basePath('js/html5shiv.min.js'),   'text/javascript', array('conditional' => 'lt IE 9',))
+    ; ?>
+  </head>
+  <body>
+    <!-- Static navbar -->
+    <nav class="navbar navbar-inverse navbar-static-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="/">
+            <img class="logo-too-small-hide img-responsive" src="<?= $this->basePath('img/new-logo.png') ?>" />
+            <h1 class="logo-too-small-show pull-left navbar-toggle">Tigerdile</h1>
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <div class="navbar-binder"> <!-- Kludgey -->
+            <!-- TODO add class = active to active li's -->
+            <ul class="nav navbar-nav navbar-right top-nav">
+              <?php if($isLoggedIn): ?>
+                <li><a href="<?= $this->url('logout') ?>"><?= $this->translate('Logout') ?></a></li>
+                <li><a href="<?= $this->url('dashboard-settings') ?>"><?= $this->translate('Settings') ?></a></li>
+              <?php else: ?>
+                <li><a href="<?= $this->url('login') ?>?return=<?= urlencode($_SERVER['REQUEST_URI']) ?>"><?= $this->translate('Login') ?></a></li>
+              <?php endif ?>
+              <li><a href="<?= $this->url('getting-started') ?>"><?= $this->translate('How to Stream') ?></a></li>
+              <li><a href="<?= $this->url('support') ?>"><?= $this->translate('Support') ?></a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right middle-nav">
+              <li><a href="https://twitter.com/intent/follow?ref_src=twsrc%5Etfw&region=follow_link&screen_name=tigerdile&tw_p=followbutton">Follow Tigerdile on Twitter!</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right bottom-nav">
+              <li><a href="<?= $this->url('stream') ?>"><?= $this->translate('Streams!') ?></a></li>
+              <li><a href="<?= $this->url('pricing') ?>"><?= $this->translate('Pricing') ?></a></li>
+              <li><a href="<?= $this->url('homecon') ?>"><?= $this->translate('HomeCon') ?></a></li>
+              <li><a href="<?= $this->url('faq') ?>"><?= $this->translate('FAQ') ?></a></li>
+              <li><a href="<?= $this->url('order') ?>"><?= $this->translate('Pay') ?></a></li>
+            </ul>
+          </div>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    <div class="container-fluid content-body">
+      <div class="panel panel-danger">
+        <div class="panel-heading text-center">
+          Tigerdile is on its new server!  Please alert the admins if there are any issues.  We will be doing an open source release
+          soonish (probably end of Summer) for those of you who might be interested in poking at it.
+        </div>
+      </div>
+      <?php echo $this->content; ?>
+      <div class="clearfix"></div>
+      <hr />
+      <footer>
+        <p>&copy; <?php echo date('Y') ?> Tigerdile, LLC.  <?php echo $this->translate('All rights reserved.') ?> - <a href="<?= $this->url('terms') ?>">Terms of Service / Privacy Policy / Refund Policy</a></p>
+      </footer>
+    </div> <!-- /container -->
+    <?php echo $this->inlineScript() ?>
+
+    <script>
+      <!--
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-36382929-2', 'auto');
+      ga('send', 'pageview');
+      -->
+    </script>
+  </body>
+</html>

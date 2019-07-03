@@ -1,0 +1,103 @@
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/dashboard/partial-dashboard-menu.phtml',
+                                array('user' => $user));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <?php if(!empty($this->messages)) : ?>
+            <div class="jumbotron text-center">
+                <?php foreach($this->messages as $message) : ?>
+                    <p style="color: red;"><?= $message ?></p>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+        <?php
+            $form = $this->form;
+            $form->prepare();
+
+            // Configure form
+            $form->setAttribute('action', $this->url('dashboard-settings'));
+            $form->setAttribute('method', 'post');
+            $form->setAttribute('role', 'form');
+
+            echo $this->form()->openTag($form);
+        ?>
+        <h3 class="text-center">
+            Tigerdile never shares or sells your personal information.
+            We also very rarely send out emails.  If you stream on Tigerdile,
+            we send information about stuff like HomeCon a couple times a
+            year.  We have never sent bulk mail to viewers, and likely
+            never will.  To change your username, please contact support.
+        </h3>
+        <div class="form-group">
+            <label for="email"><?= $form->get('email')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('email')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('email')); ?>
+        </div>
+        <div class="form-group">
+            <label for="info_optout">Receive informational emails?  These <strong>include the summary mailings telling you about activity from your subscribed profiles!</strong></label>
+            <?= $this->formElement($form->get('info_optout')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('info_optout')); ?>
+        </div>
+        <div class="form-group">
+            <label for="info_optout">Receive billing reminders?  These reminders ONLY apply to people who stream on Tigerdile.  It is recommended you leave them on.</label>
+            <?= $this->formElement($form->get('billing_optout')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('billing_optout')); ?>
+        </div>
+        <h3>Only use the password fields if you want to change your password!</h3>
+        <div class="form-group">
+            <label for="password"><?= $form->get('password')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('password')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('password')); ?>
+        </div>
+        <div class="form-group">
+            <label for="password"><?= $form->get('confirmpassword')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('confirmpassword')->setAttribute('class', 'form-control')) ?>
+        </div>
+        <?php if(count($subscriptions)): ?>
+            <h3>You are using the following payment methods to pay for your
+                active subscriptions.</h3>
+            <ul>
+            <?php foreach($subscriptions as $sub): ?>
+                <li>$<?= number_format($sub->getPayment(),2) ?> for
+                    <?= $sub->getProfileTitle() ?> on
+                    <select name="sub_<?= $sub->getId() ?>">
+                      <?php foreach($cards as $cardId => $card): ?>
+                        <option value="<?= $cardId ?>" <?= $sub->getChildMeta() == $cardId ? 'SELECTED' : '' ?>><?= $card ?></option>
+                      <?php endforeach ?>
+                    </select>
+            <?php endforeach ?>
+            </ul>
+            <button class="btn btn-success" id="addcard">Add New Card</button>
+            <?php
+                $this->inlineScript()
+                     ->appendFile('https://checkout.stripe.com/checkout.js')
+                     ->captureStart(); ?>
+                var handler = StripeCheckout.configure({
+                    key: "<?= $this->stripePublishKey ?>",
+                    image: "/img/swaggerdile.png",
+                    name: 'Swaggerdile',
+                    locale: 'auto',
+                    panelLabel: 'Add a Card',
+                    email: "<?= $this->user->getUserEmail() ?>",
+                    description: "Supporting Your Favorite Creators!",
+                    token: function(token) {
+                        var myForm = jQuery('form');
+                        myForm.append('<input type="hidden" name="stripeToken" value="' + token.id + '" /><input type="hidden" name="stripeTokenType" value="card" />');
+                        myForm.submit();
+                    }
+                });
+
+                jQuery('#addcard').click(function(e) {
+                    handler.open();
+                    e.preventDefault();
+                });
+            <?php $this->inlineScript()->captureEnd(); ?>
+        <?php endif ?>
+        <p>&nbsp;</p>
+        <?= $this->formElement($form->get('act')->setAttribute('class', 'btn btn-success')) ?>
+        <?= $this->form()->closeTag() ?>
+    </div>
+</div>

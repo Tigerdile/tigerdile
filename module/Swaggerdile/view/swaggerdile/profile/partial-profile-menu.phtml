@@ -1,0 +1,49 @@
+        <?php if((!$isOwner) && (!$subscriberTier)) : ?>
+            <a href="<?= $this->url('profiles', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Profile Home</a>
+            <?php if($profile->hasSamples()): ?>
+                <a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Browse Samples</a>
+            <?php endif ?>
+            <a href="#" id="send-mail" class="btn btn-default btn-lg" style="width: 100%;">Email Creator</a>
+        <?php elseif(isset($subscriberTier) && $subscriberTier) : ?>
+            <a href="<?= $this->url('profiles', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Profile Home</a>
+            <a href="<?= $this->url('profile-posts', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Activity Stream</a>
+            <a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Browse Files</a>
+            <a href="#" id="send-mail" class="btn btn-default btn-lg" style="width: 100%;">Email Creator</a>
+        <?php elseif($isOwner) : ?>
+            <?php if($editMode) : ?>
+                <input type="submit" name="act" class="btn btn-lg btn-success" value="Save Changes" />
+                <a href="<?= isset($cancelLink) ? $cancelLink : $this->url('profiles', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg">Cancel Changes</a>
+                <?php if(isset($post) && is_object($post)) : ?>
+                    <input type="submit" name="act" class="btn btn-lg btn-danger" value="Delete" onclick="return confirm('Are you absolutely sure?  Click OK to delete this item and its comments.');" />
+                <?php endif ?>
+            <?php elseif(isset($post) && is_object($post)) : ?>
+                <?php if($post->getTypeId() == 1): ?>
+                    <a class="btn btn-default btn-lg" href="<?= $this->url('profile-posts', array('profile' => $profile->getUrl(), 'activity' => 'edit', 'param' => $post->getId())) ?>">Edit Post</a>
+                <?php else: ?>
+                    <?php
+                        $cwd = '';
+                        $generatedPath = $post->generateParentPath($user, $profile);
+
+                        if($generatedPath) {
+                            $cwd = substr($generatedPath, 0, -1);
+                        }
+                    ?>
+
+                    <a class="btn btn-default btn-lg" href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => $post->getId())) ?>?cwd=<?= $cwd ?>">Edit</a>
+                <?php endif ?>
+            <?php else: ?>
+                <a class="btn btn-default btn-lg" href="<?= $this->url('profiles', array('profile' => $profile->getUrl(), 'activity' => 'edit')) ?>">Edit Profile</a>
+            <?php endif ?>
+            <a class="btn btn-default btn-lg" href="<?= $this->url('profile-posts', array('profile' => $profile->getUrl(), 'activity' => 'new')) ?>">Add Post</a>
+            <a href="<?= $this->url('profile-posts', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Access Content</a>
+            <a class="btn btn-default btn-lg" href="<?= $this->url('profile-files', array('profile' => $profile->getUrl())) ?>">File Manager</a>
+            <a href="<?= $this->url('profile-subscribers', array('profile' => $profile->getUrl())) ?>" class="btn btn-default btn-lg" style="width: 100%;">Your Subscribers</a>
+
+        <?php endif ?>
+        <?php
+            $this->inlineScript()->captureStart(); ?>
+            jQuery('#send-mail').click(function(ev) {
+                jQuery('body').append('<form id="sendmail" action="<?= $this->url('email') ?>" method="post"><input type="hidden" name="recipients" value="<?= $profile->getOwnerId() ?>" /><input type="hidden" name="return" value="<?= htmlentities($this->serverUrl(true)) ?>" /><input type="hidden" name="profileId" value="<?= $profile->getId() ?>" /></form>');
+                jQuery('#sendmail').submit();
+            });
+        <?php $this->inlineScript()->captureEnd(); ?>

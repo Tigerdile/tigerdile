@@ -1,0 +1,32 @@
+<?php
+/*
+ * File rows - done as a partial so that we can reuse code and
+ * send file rows as ajax easily.
+ */
+?>
+<div class="col-md-4 text-center <?= $item->getTypeId() == 3 ? 'is-folder' : '' ?>" id="filegrid_<?= $item->getId() ?>">
+    <div class="panel-body file-square">
+        <a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $path ? $path . '/' . $item->getId() : $item->getId())) ?>" class="<?= $item->isImage() ? 'isImageLink' : '' ?>" id="<?= $item->getId()?>_image">
+            <?php if(\Swaggerdile\Media::contentHasThumbnail($item)) : ?>
+                <img class="img-responsive center-block" src="<?= $this->url('secure-thumbnail', array('profile' => $profile->getUrl(), 'activity' => $item->getId())) ?>" />
+            <?php else : ?>
+                <span style="font-size: 100px;" class="glyphicon <?= $item->getTypeId() == 3 ? 'glyphicon-folder-open' : 'glyphicon-file' ?>"></span>
+            <?php endif ?>
+            <p class="ellipsis"><?= htmlentities($item->getTitle()) ?></p>
+        </a>
+        <p class="text-right">
+            <small>
+                <?php if($item->isImage()) : ?>
+                    <a href="<?= $this->url('profile-files', array('profile' => $profile->getUrl(), 'activity' => $path ? $path . '/' . $item->getId() : $item->getId())) ?>?dl=1">
+                        Download
+                    </a>
+                    <?php if($isOwner): ?> - <?php endif ?>
+                <?php endif ?>
+                <?php if($isOwner) : ?>
+                    <input type="checkbox" class="pull-left" value="<?= $item->getId() ?>" name="selectedFiles" />
+                    <a href="<?= $this->url('profile-file-manage', array('profile' => $profile->getUrl(), 'activity' => $item->getId())) ?>?cwd=<?= $path ?>">Edit</a>
+                <?php endif ?>
+            </small>
+        </p>
+    </div>
+</div>

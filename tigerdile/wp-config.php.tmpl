@@ -1,0 +1,114 @@
+<?php
+/**
+ * The base configurations of the WordPress.
+ *
+ * This file has the following configurations: MySQL settings, Table Prefix,
+ * Secret Keys, WordPress Language, and ABSPATH. You can find more information
+ * by visiting {@link http://codex.wordpress.org/Editing_wp-config.php Editing
+ * wp-config.php} Codex page. You can get the MySQL settings from your web host.
+ *
+ * This file is used by the wp-config.php creation script during the
+ * installation. You don't have to use the web site, you can just copy this file
+ * to "wp-config.php" and fill in the values.
+ *
+ * @package WordPress
+ */
+
+// ** MySQL settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define('DB_NAME', 'tigerdile');
+
+/** MySQL database username */
+define('DB_USER', 'tigerdile');
+
+/** MySQL database password */
+define('DB_PASSWORD', '');
+
+/** MySQL hostname */
+define('DB_HOST', 'localhost');
+
+/** Database Charset to use in creating database tables. */
+// I don't think we use this anywhere anymore.
+define('DB_CHARSET', 'utf8');
+
+/** The Database Collate type. Don't change this if in doubt. */
+// We almost definitely don't use this.
+define('DB_COLLATE', '');
+
+// Tigerdile stream server settings.
+define('TIGERDILE_STREAM_SERVER', 'localhost');
+define('TIGERDILE_STREAM_PORT', '1935');
+define('TIGERDILE_STREAM_ADMIN_PORT', '1112');
+
+// Tigerdile's JIRA - this is no longer used, but Tigerdile used to push
+// all support tickets to JIRA.  The code has been commented out.
+define('TIGERDILE_JIRA_URL', 'https://not-anymore.atlassian.net');
+define('TIGERDILE_JIRA_USER', '');
+define('TIGERDILE_JIRA_PASSWORD', '');
+
+// Donation API key
+//
+// Tigerdile uses a donation proxy to submit funds to paypal, so
+// that paypal can't see the donations are coming from Tigerdile.
+// The key here lets the proxy know that the request is coming
+// from Tigerdile.  This is because we were deemed porn at one
+// point and someone nearly got banned off PayPal from taking
+// donations from us.
+define('TIGERDILE_DONATION_API_TOKEN', 'redacted');
+
+// Define bulk SMTP host
+//
+// We actually use mailjet now.  You can probably set this
+// to port 25 at localhost to use a local mailer.
+define('TIGERDILE_BULK_SMTP_HOST', 'smtp.sendgrid.net');
+define('TIGERDILE_BULK_SMTP_PORT', '465');
+define('TIGERDILE_BULK_SMTP_USER', 'xxx');
+define('TIGERDILE_BULK_SMTP_PASS', 'xxx');
+define('TIGERDILE_BULK_SMTP_SENDER', 'support@tigerdile.com');
+
+// Chat settings -- point the HTTP address to your chat server URL
+// The redacted TD_ADMIN_KEY should work since chat server shares this
+// config.
+define('TD_CHATSERVER_HTTP', 'https://chat.tigerdile.com/');
+define('TD_ADMIN_KEY', 'redacted');
+
+// Stripe settings -- you can use a test key pair from stripe if you want
+// to work with this.
+define('TIGERDILE_STRIPE_SECRET_KEY', 'sk_test_xxx');
+define('TIGERDILE_STRIPE_PUBLISH_KEY', 'pk_test_xxx');
+
+// Cookiebase (Swaggerdile) Auth Info
+// Swaggerdile uses a JWT-style system and this sets the security items
+// for it.
+define('COOKIEBASE_NAME', 'swaggah');
+define('COOKIEBASE_SHORT_SECRET', 'redacted');
+define('COOKIEBASE_SECRET', 'redacted');
+
+
+/**#@+
+ * Authentication Unique Keys and Salts.
+ *
+ * Change these to different unique phrases!
+ * You can generate these using the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}
+ * You can change these at any point in time to invalidate all existing cookies. This will force all users to have to log in again.
+ *
+ * @since 2.6.0
+ */
+// I don't know that these are used anymore TBH -- they need to be defined but I think cookiebase
+// supersedes these.
+define('LOGGED_IN_KEY',    'redacted');
+define('LOGGED_IN_SALT',   'redacted');
+
+/**
+ * WordPress Database Table prefix.
+ *
+ * You can have multiple installations in one database if you give each a unique
+ * prefix. Only numbers, letters, and underscores please!
+ */
+$table_prefix  = 'tigerd_';
+
+define('COOKIE_DOMAIN', 'localhost');
+
+// We really rely on the cookie hash being this, so let's set it.
+define('COOKIEHASH', '3aa3ecc878d9dcf372f84639ba8cdc39');
+

@@ -1,0 +1,60 @@
+<?php if(!empty($messages)): ?>
+    <div class="jumbotron">
+        <ul>
+            <?php foreach($messages as $message): ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+<?php endif ?>
+<div class="jumbotron">
+  <?php if($this->isApprovedStreamer) : ?>
+    <p><?=
+        sprintf(
+            $this->translate('You have been approved to use Tigerdile!  You may go ahead and make your stream.  Please accept our %sTerms and Conditions%s to continue.'),
+            "<a href=\"{$this->url('terms')}\" target=\"_blank\">",
+            '</a>') ?>
+    </p>
+    <form class="text-center" role="form" action="<?= $this->url('create-profile') ?>" method="post">
+      <input type="submit" name="accept" class="btn btn-default" value="<?= $this->translate('I Have Read the Terms and Conditions and Accept Them') ?>" />
+    </form>
+  <?php elseif(!is_object($user)): ?>
+    <p>
+        <?= sprintf($this->translate("Please %sLog In%s or %sSign Up%s before trying to create a stream."),
+                    "<a class=\"btn btn-default btn-lg\" href=\"{$this->url('login')}?return={$this->url('create-profile')}\">",
+                    '</a>',
+                    "<a class=\"btn btn-default btn-lg\" href=\"{$this->url('signup')}?return={$this->url('create-profile')}\">",
+                    '</a>') ?>
+  <?php elseif($request_success): ?>
+    <p><?= $this->translate("Your request has been submitted!  You will receive an email, usually within 24 hours, from <a href=\"mailto:support@tigerdile.com\">support@tigerdile.com</a> when your approval is processed."); ?></p>
+    <p><?= $this->translate("Thank you for your interest in Tigerdile and also for your patience!"); ?></p>
+  <?php else: ?>
+    <p><?= $this->translate("In order to protect the community, we require anyone who wants to
+       get stream on Tigerdile to go through an approval process. 
+       Because we're a small service, we need to be very
+       sure that the content you produce is stuff that won't get us in
+       trouble with our card processor.") ?>
+    </p>
+    <p><?= $this->translate("We do not judge your skill or content, but we
+        do make sure that what you produce is something we are comfortable
+        standing behind.  <strong>You must be 18 years of age or older to create
+        a Tigerdile stream.</strong>"); ?></p>
+    <p><?= sprintf($this->translate("Please provide a link to your work (FurAffinity or Weasyl gallery,
+        website, etc.) below so that we may review it.  Be sure to check out
+        our %sTerms and Conditions%s as well!  <strong>Do not
+        provide a Tumblr URL unless that is your only gallery.  They
+        take longer for us to review!</strong>"),
+        "<a href=\"{$this->url('terms')}\" target=\"_blank\">",
+        '</a>') ?></p>
+    <br /><br />
+    <form class="text-center" role="form" action="<?= $this->url('create-profile') ?>" method="post">
+      <div class="form-group">
+          <label for="url"><?= $this->translate('Gallery URL') ?></label>
+          <input class="form-control" type="text" name="url" value="<?= htmlentities($url); ?>" placeholder="<?= $this->translate('Gallery URL') ?>" />
+      </div>
+      <div class="form-group">
+          <input type="submit" name="act" class="btn btn-lg btn-success" value="<?= $this->translate('I am 18 years old or older - Request Approval') ?>" />
+       </div>
+    </form>
+  <?php endif; ?>
+</div>

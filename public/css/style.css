@@ -1,0 +1,288 @@
+.top-nav li a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+ul.top-nav {
+    margin-right: 0px;
+}
+
+.bottom-nav li a {
+    margin-top: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.middle-nav li a {
+    margin-top: 10px !important;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+}
+
+
+@media(max-width: 859px) {
+    .top-nav li a {
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    ul.top-nav {
+        margin-bottom: 0px;
+    }
+
+    .bottom-nav li a {
+        margin-top: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    ul.bottom-nav {
+        margin-top: 0px;
+    }
+
+
+    .middle-nav li a {
+        margin-top: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    ul.middle-nav {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+div.navbar-header a {
+    color: #fdaa00;
+}
+
+@media(min-width: 860px) {
+    div.navbar-binder {
+        float: right;
+        width: 450px;
+    }
+}
+
+.navbar {
+    font-size: 18px;
+}
+
+.logo-too-small-hide {
+    display: block;
+}
+
+.logo-too-small-show {
+    display: none;
+}
+
+
+@media(max-width: 480px) {
+    .logo-too-small-hide {
+        display: none;
+    }
+
+    .logo-too-small-show {
+        display: block;
+    }
+}
+
+.wysiwyg-box {
+	min-height: 200px;
+	border: 3px solid #cccccc;
+	border-radius: 4px;
+}
+
+@font-face {
+        font-family: 'LuckiestGuy';
+        src: url('/fonts/LuckiestGuy.eot');
+        src: local('Luckiest Guy'), local('LuckiestGuy-Regular'), url('/fonts/LuckiestGuy.woff') format('woff'), url('/fonts/LuckiestGuy.ttf') format('truetype'), url('/fonts/LuckiestGuy.svg') format('svg');
+        font-weight: 400;
+        font-style: normal;
+}
+
+/* Sidebar buttons */
+#profile-sidebar .btn-lg {
+    width: 100%;
+    margin-bottom: 10px;
+    font-family: LuckiestGuy, Sans-Serif;
+    background-color: #dfdcdf;
+}
+
+#profile-sidebar .btn-success {
+    background-color: #e28d08 !important;
+}
+
+#profile-sidebar .btn-danger {
+    background-color: #d9534f !important;
+}
+
+#profile-grid div.profile-image {
+    width: 280px;
+    height: 200px;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+#profile-grid div.profile-image a {
+    color: #ffffff;
+}
+
+#profile-grid div.profile-text {
+    background-color: #dfdcdf;
+    height: 80px;
+    width: 280px;
+}
+
+#profile-grid h4 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 16px;
+} 
+
+#profile-grid h5 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* From Bootstrap */
+#profile-grid .profile-amount {
+    display: inline-block;
+    margin: 2px;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+        touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 15px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #333333;
+    width: 75px;
+    height: 75px;
+    background-color: #e28d08;
+    border-color: #c97e07;
+}
+
+#profile-grid .profile-amount span {
+    font-size: 11px;
+}
+
+#profile-grid .profile-explain {
+    width: 200px;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+div.panel-body p {
+    margin: 0px;
+}
+
+ul.no-bullets li {
+    list-style: none;
+}
+
+ul.no-bullets {
+    padding: 0;
+}
+
+div.editor-small a {
+    font-size: 10px;
+}
+
+div.file-square {
+    width: 200px;
+    height: 260px;
+}
+
+.img-responsive > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+body {
+    background: rgba(0, 0, 0, 0) url('../img/bg.png') repeat;
+}
+
+div.jumbotron a,
+div.panel-body a {
+    color: #6cb3f0;
+}
+
+div.jumbotron-500 {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.panel-pricing {
+    min-height: 400px;
+}
+
+th.fav {
+    width: 40px;
+}
+
+th.sfw {
+    width: 40px;
+}
+
+th.iconbox {
+    width: 60px;
+}
+
+th.streamviewers {
+    width: 60px;
+}
+
+#screenshot{
+    position:absolute;
+    border:1px solid #ccc;
+    background:#333;
+    padding:5px;
+    display:none;
+    color:#fff;
+}
+
+span.sfw {
+        color: green;
+}
+
+td.isnsfw {
+        color: red;
+}
+
+td.issfw {
+        color: green;
+}
+
+div.old-top-header {
+        text-align: left;
+        width: 400px;
+        margin: 10px auto;
+        border: 1px dashed #ffffff;
+        padding: 10px;
+}
+}

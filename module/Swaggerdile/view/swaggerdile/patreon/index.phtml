@@ -1,0 +1,68 @@
+<?php if(!is_object($user)) : ?>
+    <div class="jumbotron">
+        <p class="text-center">Before you continue, you need to either
+            <a href="<?= $this->url('login') ?>?return=<?= urlencode($this->url('patreon') . "?return={$return}") ?>">Login</a>
+            or
+            <a href="<?= $this->url('signup') ?>?return=<?= urlencode($this->url('patreon') . "?return={$return}") ?>">Sign Up</a>
+        </p>
+        <p class="text-center">Don't worry, we'll return you right back here when you are done.</p>
+    </div>
+<?php elseif($failure): ?>
+    <h1>Failed to Link</h1>
+    <div class="jumbotron">
+        <p>I'm sorry, we failed to link your Patreon account.  This can happen for
+           several different reasons.  If you would like, please return to the
+           profile you came from and try again.
+        </p>
+        <p>&nbsp;</p>
+        <p>If you keep getting this message, please contact Swaggerdile support
+           and we will try to find out what's wrong.  Either use the Support link
+           in the header or email us at
+           <a href="mailto:support@tigerdile.com">support@tigerdile.com</a>
+        </p>
+    </div>
+<?php else: ?>
+        <h1>Link your Patreon Profile</h1>
+        <?php if($user->getPatreonId()): ?>
+            <div class="panel panel-default">
+                <div class="panel-body bg-success text-center">
+                    Your Patreon is already linked to your Swaggerdile account!
+                </div>
+            </div>
+        <?php endif ?>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>
+                    Swaggerdile provides creators with really awesome content
+                    management tools.  However, a lot of our creators use
+                    Patreon and don't want to force all their users to change
+                    over to Swaggerdile.
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    To make life easier for everyone, we've made it so that
+                    if you support someone on Patreon, you can also access
+                    their Swaggerdile profile!  This lets our creators
+                    have all the benefits of Swaggerdile without having
+                    to move everyone off Patreon.
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <strong>
+                        All you have to do is a
+                        one-time login process to verify your Patreon account,
+                        and then you're all set!
+                    </strong>
+                </p>
+            </div>
+        </div>
+        <div class="jumbotron text-center">
+            <form method="get" action="https://www.patreon.com/oauth2/authorize">
+                <input type="hidden" name="response_type" value="code" />
+                <input type="hidden" name="client_id" value="<?= htmlentities($patreon_client_id) ?>" />
+                <input type="hidden" name="redirect_uri" value="<?= htmlentities($this->url('patreon', array(), array('force_canonical' => true))) ?>" />
+                <input type="hidden" name="state" value="<?= htmlentities($validate_token) ?>" />
+                <input type="submit" class="btn btn-lrg btn-success" value="Link Your Patreon" />
+            </form>
+        </div>
+<?php endif ?>

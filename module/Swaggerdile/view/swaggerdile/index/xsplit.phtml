@@ -1,0 +1,164 @@
+<?php
+    // Do we have a profile?
+    $profile = false;
+
+    if(is_object($user)) {
+        $profiles = $user->getProfiles();
+
+        if(count($profiles)) {
+            $profile = $profiles[0];
+        }
+    }
+?>
+<div class="col-md-12 content-heading">
+  <h1>Using XSplit with Tigerdile</h1>
+  <hr />
+</div>
+<div class="row">
+  <h4 class="text-center">
+    Disclaimer: XSplit updates frequently and the screenshots can get
+    out of date.  A best-effort is made to keep things updated.  Please
+    read through the text descriptions as they will help you through
+    even if the pictures aren't 100% accurate!
+  </h4>
+  <div class="col-md-12">
+    <ul>
+      <?php if($profile === false): ?>
+        <li>
+          First, follow the steps on
+          <a href="<?= $this->url('getting-started') ?>">our getting started page</a>.
+          Once you are approved, and your stream is set up, come back to
+          this page.
+        </li>
+      <?php else: ?>
+        <li>
+          Get your <strong>RTMP URL</strong> and your <strong>Stream Name</strong>.
+          You can get both of them from here:
+          <a href="<?= $this->url('stream/detail/edit', array('stream' => $profile->getUrl())) ?>" target="_blank">Stream Edit Page</a>
+          The information is under the Stream Configuration slider.
+        </li>
+      <?php endif ?>
+      <li>
+        Register for XSplit and install the software.  You can go
+        <a href="http://www.xsplit.com" target="_blank">here</a>
+        to do so.
+      </li>
+      <li>
+        Start up XSplit.  You'll see a screen like this:
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-12 text-center">
+    <img src="<?= $this->basePath('img/xsplit/step1.png') ?>" />
+  </div>
+  <div class="col-md-12">
+    <ul>
+      <li>Login with your XSplit login and password.  You will probably want
+          to use Remember Me.
+      </li>
+      <li>
+        The first time you stream, you will need to set up XSplit so it can
+        talk to Tigerdile.  You should only have to do this once.  Pick
+        the "Broadcast" menu and select "Add Channel..." and then pick
+        "Custom RTMP".  A window will pop up, looking like:
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-12 text-center">
+    <img src="<?= $this->basePath('img/xsplit/screenshot.png') ?>" />
+  </div>
+  <div class="col-md-12">
+    <ul>
+      <li>All the fields will be empty when you first open it.  Fill in
+          the fields as shown above, or more specifically:
+        <ul>
+          <li>Name: <strong>Tigerdile</strong></li>
+          <li>RTMP URL:
+            <?php if($profile === false): ?>
+              Your RTMP URL
+            <?php else: ?>
+              <strong>rtmp://stream.tigerdile.com:1935/live?token=<?= urlencode($profile->getRtmpPassword()) ?></strong>
+            <?php endif ?>
+          </li>
+          <li>Your Stream Name:
+            <?php if($profile === false): ?>
+              Your Stream Name
+            <?php else: ?>
+              <strong><?= $profile->getUrl() ?></strong>
+            <?php endif ?>
+          </li>
+          <li>
+            Uncheck "Automatically save recording on location drive" unless you want to
+            save recordings.
+          </li>
+          <li>
+            You can click the "Bandwidth Test" button to make sure your connection
+            works.  If the test fails altogether, then you have a setting wrong.
+            If your connection is too slow, try lowering the bitrate by about 100
+            points at a time until it works okay.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Click OK, then OK again.  Now, stream your desktop or a camera
+        following the instructions below.
+      </li>
+    </ul>
+  </div>
+</div>
+<h3>Stream your Desktop</h3>
+<p>
+  If you want to stream your desktop (such as to show digital work), you can do the following.  XSplit also has a game broadcast mode; as game broadcasting is not a primary function of Tigerdile, we do not support it, but you’re welcome to explore that on your own.
+</p>
+<ul>
+  <li>Click the "Add" button in the lower left corner of the screen under
+      "Scene Sources" and pick "Add Screen Region".
+  </li>
+  <li>
+    The screen picker is a little strange and doesn't provide much
+    direction.  Here's how you use it:
+    <ul>
+      <li>Click in a window to set that as the screen area.</li>
+      <li>Click in the upper left corner for the whole screen.</li>
+      <li>Click and drag to select a rectangle.</li>
+    </ul>
+  </li>
+  <li>
+    Your screen will appear in 1/4th of hte "scene".  Drag a corner of the
+    screen to make it fill the entire area.  This screenshot somewhat
+    demonstrates it:
+  </li>
+</ul>
+<div class="text-center">
+  <img src="<?= $this->basePath('img/xsplit/step3.png') ?>" />
+</div>
+<ul>
+  <li>Click "Tigerdile" under the Broadcast menu to start.  You're live!
+      Click the same place again to disconnect later.
+  </li>
+</ul>
+<h3>Stream a Camera</h3>
+<ul>
+  <li>Click the "Add" button in the lower left corner of the screen under
+      "Scene Sources" and pick "Add Camera".
+  </li>
+  <li>Your camera will show up in 1/4th of the "scene" as shown above.
+      Click and drag one of the corners of the camera output to make it
+      fill the "scene".
+  </li>
+  <li>
+    You CAN have a camera and desktop streaming going at the same time!
+  </li>
+  <li>Click "Tigerdile" under the Broadcast menu to start.  You're live!
+      Click the same place again to disconnect later.
+  </li>
+</ul>
+<h3>General Tips</h3>
+<ul>
+  <li>  
+    Control your audio balance with the “signal strength” rectangles next to the mic and speaker icons as seen in the screenshot above.  The mic is your microphone level, the speaker is your computer’s audio (music).
+  </li>
+  <li>
+    You can add or remove as many sources as you want.  Set up both desktop and camera to switch between the two or do a split-screen!
+  </li>
+</ul>

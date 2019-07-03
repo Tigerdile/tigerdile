@@ -1,0 +1,398 @@
+<?php
+    // Add CSS
+    $this->headLink()->appendStylesheet(
+                        $this->basePath('video-js/video-js.css')
+    );
+
+    $multis = $settings['multi'];
+    $numMultis = count($multis);
+
+    $lowBandwidth = $settings['lowBandwidth'];
+    $password = $settings['password'];
+    $rtmpt = $settings['rtmpt'];
+
+    // Add JS
+    $this->inlineScript()->appendFile(
+                        $this->basePath('video-js/video.min.js')
+    )->appendFile($this->basePath('video-js-libs/videojs-contrib-hls.min.js'))
+     ->appendFile($this->basePath('js/bootstrap-toolkit.min.js'))
+     ->appendFile($this->basePath('js/flv.min.js'))
+     ->appendFile($this->basePath('js/td-video.js'))
+     ->captureStart(); ?>
+videojs.options.flash.swf = "<?= $this->basePath('video-js.swf') ?>";
+
+var channelId = <?= (int)$stream->getId() ?>;
+
+jQuery(document).ready(function() {
+    jQuery('#popoutButton').click(function(ev) {
+
+        <?php $settings['popout'] = 1; ?>
+        window.open('<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>',
+                    '_blank',
+                    'height=' + jQuery('div.video-row').height() +
+                    ',menubar=0,location=0,resizable=1,scrollbars=0,status=0,toolbar=0,width=' +
+                    jQuery('#mainRow').width()
+        );
+        <?php $settings['popout'] = 0; ?>
+
+        jQuery('#my_video,div#mainRow').remove();
+        ev.preventPropagation();
+        return false;
+    });
+
+    jQuery('#favbutton').click(function(ev) {
+        var img = jQuery(this).find('img');
+
+        if(img.attr('src').endsWith("full.png")) {
+            // delete it
+            jQuery.ajax({
+                async: true,
+                url: '<?= $this->url('rest', array('action' => 'removefavorite')) ?>',
+                data: {channelId: channelId},
+                dataType: 'json',
+                method: 'POST',
+                success: function(data) {
+                        if(data["status"]) {
+                            img.attr('src', '<?= $this->basePath('img/starempty.png') ?>');
+                        }
+                    }
+            });
+        } else {
+            jQuery.ajax({
+                async: true,
+                url: '<?= $this->url('rest', array('action' => 'addfavorite')) ?>',
+                data: {channelId: channelId},
+                dataType: 'json',
+                method: 'POST',
+                success: function(data) {
+                        if(data["status"]) {
+                            img.attr('src', '<?= $this->basePath('img/starfull.png') ?>');
+                        }
+                    }
+            });
+        }
+
+        ev.preventDefault();
+        return false;
+    });
+
+    jQuery('#sfw-toggle').click(function(ev) {
+        ev.preventDefault();
+
+        var ele = jQuery(this);
+
+        jQuery.ajax({
+            async: true,
+            url: '<?= $this->url('rest', array('action' => 'setsfw')) ?>',
+            data: {channelId: channelId, sfw: ele.attr('ref')},
+            dataType: 'json',
+            method: 'POST',
+            success: function(data) {
+                        if(data["status"]) {
+                            if(ele.attr('ref') == "1") {
+                                ele.text('SFW: ON');
+                                ele.removeClass('btn-danger');
+                                ele.addClass('btn-success');
+                                ele.attr('ref', '0');
+                            } else {
+                                ele.text('SFW: OFF');
+                                ele.addClass('btn-danger');
+                                ele.removeClass('btn-success');
+                                ele.attr('ref', '1');
+                            }
+                        }
+                    }
+        });
+
+        return false;
+    });
+});
+
+<?php
+    $this->inlineScript()->captureEnd();
+
+    $isLoggedIn = is_object($user);
+    $isOwner = $isLoggedIn && ($stream->getOwnerId() == $user->getId());
+
+    /*
+     * This is a function that will generate some HTML for a given stream with
+     * some parameters.
+     *
+     * @param Profiles stream - the stream we're generating for
+     * @param string size - the bootstrap CSS class to use
+     * @param string id - Some ID number, should be sequential
+     * @param View $view - Pass in $this.  Cause PHP won't let me use $this inside the method,
+     *                     nor am I allowed to "global" it.
+     */
+    function printStream($stream, $size, $id, $view, $settings, $lowBandwidth, $rtmpt, $password) {
+
+        if(($streamOffline = \Swaggerdile\Media::getStreamOfflineBackground($stream)) === false) {
+            $streamOffline = $view->basePath('img/default-offline.jpg');
+        }
+?>
+        <div class="<?= $size ?> embed-responsive embed-responsive-<?= $stream->getAspectRatio() ? '16by9' : '4by3' ?>">
+          <?php if($lowBandwidth): ?>
+              <img src="https://preview.tigerdile.com/<?= $stream->getUrl() ?>.jpg" id="imageTarget0" class="img-responsive" />
+            </div>
+            <div class="col-md-12">
+              <audio id="my_video<?= $id ? $id : '' ?>"
+                     class="video-js vjs-default-skin clear-both"
+                     controls
+                     autoplay
+                     width="100%"
+                     height="30"
+                     data-setup='{"techOrder": ["flash", "html5"], "html5": {"hls": {"withCredentials": true}} }'
+              >
+                <source src="https://outbound.tigerdile.com/<?= $stream->getUrl() ?>_audio/index.m3u8<?= (strlen($password) ? '?stream_password=' + urlencode($password) : '' ) ?>" type="application/x-mpegURL" />
+              </audio>
+            </div>
+          <?php else: ?>
+              <video id="my_video<?= $id ? $id : '' ?>"
+                     class="video-js vjs-default-skin embed-responsive-item"
+                     controls
+                     autoplay
+                     poster="<?= $streamOffline ?>"
+              >
+            </video>
+          <?php endif?>
+        </div>
+<?php $view->inlineScript()->captureStart(); ?>
+jQuery(document).ready(function() {
+    <?php if($lowBandwidth) : ?>
+        var video = videojs('my_video<?= $id ? $id : '' ?>', {html5: {hls: {withCredentials: true}}});
+
+        if(!strlen($id)) {
+            video.volume(1);
+        } else {
+            video.volume(0);
+        }
+
+        return;
+    <?php endif ?>
+
+    var video = tdvideo.loadVideo('my_video<?= $id ? $id : '' ?>',
+                                  <?php if(!$settings['forceFlash']) : ?>
+                                      'https://outbound.tigerdile.com:8443/live/<?= $stream->getUrl() ?>.flv<?= strlen($password) ? '?stream_password=' . urlencode($password) : '' ?>'
+                                  <?php else: ?>
+                                      ''
+                                  <?php endif ?>,
+                                  <?php if(!$settings['forceFlashless']): ?>
+                                      '<?= $rtmpt ? 'rtmpt' : 'rtmp' ?>://outbound.tigerdile.com/live/<?= $stream->getUrl() .  (strlen($password) ? '?stream_password=' . urlencode($password) : '') ?>'
+                                  <?php else: ?>
+                                      ''
+                                  <?php endif ?>,
+                                  <?php if(!$settings['forceFlash']) :?>
+                                      'https://outbound.tigerdile.com/<?= $stream->getUrl() ?>/index.m3u8<?= (strlen($password) ? '?stream_password=' . urlencode($password) : '' ) ?>'
+                                  <?php else: ?>
+                                      ''
+                                  <?php endif ?>, <?= $id ? 0 : 1 ?>, true);
+
+});
+<?php $view->inlineScript()->captureEnd();
+
+    }
+
+    if(!$popout):
+?>
+  <style>
+    div.video-controls-top .btn {
+        height: 30px;
+        line-height: 2;
+    }
+
+    .chat-wrapper{
+        position:absolute;
+        left:75%;
+        top:0;
+        right:0;
+        bottom:0;
+    }
+
+    .chat-wrapper iframe{
+        width:100%;
+        height:100%;
+    }
+
+    @media screen and (max-width:991px){
+        .chat-wrapper {
+            position:relative;
+            height:300px;
+            width:100%;
+            left:0;
+            float: left;
+        }
+    }
+
+    @media screen and (min-width:1200px){
+        div.video-row .col-md-9 {
+            width: 75vmin;
+            margin-left: 11vmin;
+        }
+    }
+
+
+//    .chat-wrapper {
+//        left: 75vmin;
+//    }
+  </style>
+  <div class="row text-center">
+    <div class="video-controls-top btn-group btn-group-xs" role="group" aria-label="Video Controls">
+      <?php if($isLoggedIn && (!$isOwner)) : ?>
+        <button type="button" class="btn btn-default" id="favbutton">
+        <?php if($user->isSubscribed($stream->getId())) : ?>
+          <img height="26" width="26" src="<?= $this->basePath('img/starfull.png') ?>" />
+        <?php else: ?>
+          <img height="26" width="26" src="<?= $this->basePath('img/starempty.png') ?>" />
+        <?php endif ?>
+        </button>
+      <?php endif ?>
+      <?php if($lowBandwidth): $settings['lowBandwidth'] = 0; ?>
+        <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Regular Bandwidth</a>
+      <?php $settings['lowBandwidth'] = 1; else: $settings['lowBandwidth'] = 1; ?>
+        <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Low Bandwidth</a>
+      <?php $settings['lowBandwidth'] = 0; endif ?>
+      <?php if(!$lowBandwidth): // These don't apply for L.B. ?>
+        <?php if($settings['forceFlash']): $settings['forceFlash'] = 0; $settings['forceFlashless'] = 0; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-info">Force Flash: On</a>
+          <?php $settings['forceFlash'] = 0; $settings['forceFlashless'] = 1; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Force Flashless: Off</a>
+        <?php $settings['forceFlash'] = 1; $settings['forceFlashless'] = 0;
+            elseif($settings['forceFlashless']): $settings['forceFlash'] = 1; $settings['forceFlashless'] = 0; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Force Flash: Off</a>
+          <?php $settings['forceFlash'] = 0; $settings['forceFlashless'] = 0; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-info">Force Flashless: On</a>
+        <?php $settings['forceFlash'] = 0; $settings['forceFlashless'] = 1;
+            else: $settings['forceFlash'] = 1; $settings['forceFlashless'] = 0; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Force Flash: Off</a>
+          <?php $settings['forceFlash'] = 0; $settings['forceFlashless'] = 1; ?>
+          <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Force Flashless: Off</a>
+        <?php $settings['forceFlash'] = 0; $settings['forceFlashless'] = 0; endif ?>
+        <?php if(!$settings['forceFlashless']): ?>
+          <?php if($settings['rtmpt']): $settings['rtmpt'] = 0; ?>
+            <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-info">Proxy Friendly Mode: On</a>
+          <?php $settings['rtmpt'] = 1; else: $settings['rtmpt'] = 1; ?>
+            <a href="<?= $this->url('stream/detail', array('stream' => $stream->getUrl()), array('query' => $settings)) ?>" class="btn btn-default">Proxy Friendly Mode: Off</a>
+          <?php $settings['rtmpt'] = 0; endif; ?>
+        <?php endif ?>
+      <?php endif ?>
+      <a href="#" class="btn btn-default" id="popoutButton">Popout Video</a>
+      <a href="<?= $this->url('help') ?>" target="_blank" class="btn btn-default">Help!</a>
+      
+      <!-- Buttons for stream owners only -->
+      <?php if($isOwner) : ?>
+        <?php if($stream->getIsNsfw()) : ?>
+          <a href="#" id="sfw-toggle" ref="1" class="btn btn-danger">SFW: OFF</a>
+        <?php else: ?>
+          <a href="#" id="sfw-toggle" ref="0" class="btn btn-success">SFW: ON</a>
+        <?php endif ?>
+        <a href="<?= $this->url('stream/detail/edit', array('stream' => $stream->getUrl())); ?>" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></a>
+      <?php endif ?>
+    </div>
+  </div>
+<?php endif ?>
+  <style>
+    #subRow .embed-responsive-16by9 {
+        padding-bottom: 28.125%;
+    }
+
+    #subRow .embed-responsive-4by3 {
+        padding-bottom: 37.5%;
+    }
+  </style>
+  <div class="row video-row" style="position: relative;">
+    <div class="<?= $popout ? 'col-md-12' : 'col-md-9 col-sm-12 col-xs-12' ?>">
+      <div id="mainRow" class="row">
+        <?php if($numMultis > 1) : ?>
+            <div class="col-md-2 hidden-sm hidden-xs">&nbsp;</div>
+        <?php endif ?>
+        <?php
+            printStream($stream, $numMultis > 1 ? "col-md-8 col-sm-12 col-xs-12" : 'col-md-12 col-sm-12 col-xs-12 no-padding', 0, $this, $settings, $lowBandwidth, $rtmpt, $password);
+        ?>
+        <?php if($numMultis > 1) : ?>
+            <div class="col-md-2 hidden-sm hidden-xs">&nbsp;</div>
+        <?php endif ?>
+      </div>
+      <?php
+            // If we only have one other, make it the same size.
+            if($numMultis == 1) : ?>
+          <div class="row">
+              <?php
+                printStream($multis[0], "col-md-12 col-sm-12 col-xs-12 no-padding", 1, $this, $settings, $lowBandwidth, $rtmpt, $password);
+                $numMultis = 0;
+             ?>
+           </div>
+           <?php endif ?>
+            
+      <div id="subRow" class="row">
+        <?php
+
+            for($i = 0; $numMultis > 0; ) {
+                if($numMultis == 1) { // 1 stream stands alone, and is the last one.
+?>
+        <div class="col-md-3 col-sm-3 col-xs-3">&nbsp;</div>
+<?php
+                    printStream($multis[$i], "col-md-6 col-sm-6 col-xs-6", $i+1, $this, $settings, $lowBandwidth, $rtmpt, $password);
+?>
+        <div class="col-md-3 col-sm-3 col-xs-3 col-lg-4">&nbsp;</div>
+<?php
+                    break;
+                } elseif($numMultis == 2) { // Side by side, no space
+                    printStream($multis[$i], "col-md-6 col-sm-6 col-xs-6", $i+1, $this, $settings, $lowBandwidth, $rtmpt, $password);
+                    printStream($multis[$i+1], "col-md-6 col-sm-6 col-xs-6", $i+2, $this, $settings, $lowBandwidth, $rtmpt, $password);
+                    break;
+                } elseif($numMultis >= 3) {
+                    printStream($multis[$i], "col-md-4 col-sm-4 col-xs-4", $i+1, $this, $settings, $lowBandwidth, $rtmpt, $password);
+                    printStream($multis[$i+1], "col-md-4 col-sm-4 col-xs-4", $i+2, $this, $settings, $lowBandwidth, $rtmpt, $password);
+                    printStream($multis[$i+2], "col-md-4 col-sm-4 col-xs-4", $i+3, $this, $settings, $lowBandwidth, $rtmpt, $password);
+
+                    $i += 3;
+                    $numMultis -= 3;
+                }
+            }
+        ?>
+      </div>
+    </div>
+  <?php if(!$popout) : ?>
+    <div class="chat-wrapper">
+      <?php if($stream->getMultistreamChatOption()): ?>
+          <iframe class="chatbox embed-responsive-item" style="width:100%; height: 100%; padding: 0;" src="https://chat.tigerdile.com/?channelId=<?= $stream->getMultistreamChatOption() ?>&small=1<?= (strlen($password) ? '&stream_password=' . urlencode($password) : '' ) ?>"></iframe>
+      <?php else: ?>
+          <iframe class="chatbox embed-responsive-item" style="width:100%; height: <?= 100/($numMultis+1) ?>%; padding: 0;" src="https://chat.tigerdile.com/?channelId=<?= $stream->getId() ?>&small=1"></iframe>
+          <?php foreach($multis as $m): ?>
+            <iframe class="chatbox embed-responsive-item" style="width:100%; height: <?= 100/($numMultis+1) ?>%; padding: 0;" src="https://chat.tigerdile.com/?channelId=<?= $m->getId() ?>&small=1"></iframe>
+          <?php endforeach ?>          
+      <?php endif ?>
+    </div>
+  <?php endif ?>
+  </div>
+
+
+<?php if($lowBandwidth): ?>
+    <?php $this->inlineScript()->captureStart() ?>
+        var url = jQuery('#imageTarget').attr('src');
+
+        setInterval(function() {
+            var now = new Date();
+                jQuery('#imageTarget').attr('src', url + '?rand=' + now.getTime());
+            }, 5000);
+    <?php $this->inlineScript()->captureEnd() ?>
+<?php endif ?>
+<?php if(!$popout): ?>
+  <!-- div class="row text-center">
+    Viewer Count: <span id="viewerCount">Loading...</span>
+  </div -->
+  <?php if(strlen($stream->getDonationEmail())) : ?>
+    <div class="row text-center">
+      <form method="post" action="https://donations.tanabi.com" target="_blank">
+        <input type="hidden" name="email" value="<?= $stream->getDonationEmail() ?>" />
+        <input type="hidden" name="name" value="<?= \Swaggerdile\Model\Factory::getInstance()->get('User')->fetchById($stream->getOwnerId())->getDisplayName() ?>" />
+        <input type="hidden" name="token" value="<?= md5($stream->getDonationEmail() . TIGERDILE_DONATION_API_TOKEN) ?>" />
+        <?php if(($donateButton = \Swaggerdile\Media::getStreamDonateButton($stream)) === false) : ?>
+          <input type="submit" class="btn btn-default" name="act" value="Donate to <?= htmlentities($stream->getTitle()) ?>!" />
+        <?php else: ?>
+          <input type="image" src="<?= $donateButton ?>" alt="Donate!" />
+        <?php endif ?>
+      </form>
+    </div>
+  <?php endif ?>
+<?php endif ?>

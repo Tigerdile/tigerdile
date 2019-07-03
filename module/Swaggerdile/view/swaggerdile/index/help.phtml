@@ -1,0 +1,209 @@
+<div class="row">
+  <div class="col-md-12 content-heading">
+    <h2>Watching the Video</h2>
+    <hr />
+  </div>
+</div>
+<div class="panel-group" id="video" role="tablist" aria-multiselectable="true">
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Video Does Not Load in Firefox',
+                            'dataParent' => 'video',
+                            'body' => <<<EOS
+<p>
+    Firefox did some changes recently (as in the past couple months months)
+    that screw up Tigerdile's Flash detection.  We're working on a better
+    fix, but for now, here's the best way to get Tigerdile streaming
+    working on Firefox.
+</p>
+<p>&nbsp;</p>
+<ul>
+  <li>Download and install
+      <a href="https://get.adobe.com/flashplayer/" target="_blank">
+        the latest Flash
+      </a>.
+  </li>
+  <li>
+    When you go to a stream page, click the little "lego brick" in the
+    URL bar.  It looks like this:
+    <img src="{$this->basePath('img/ff-lego-brick.png')}" />
+  </li>
+  <li>
+    Click "Allow and Remember".
+  </li>
+</ul>
+EOS
+                        )
+    ) ?>
+
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Flash vs. Flashless',
+                            'dataParent' => 'video',
+                            'body' => <<<EOS
+<p>
+  You may question why Tigerdile has both a Flash and  Flashless stream.
+  The reason is, basically, latency.  Or the delay between what the streamer
+  does and what you see and hear.
+</p>
+<p>&nbsp;</p>
+<p>
+  Flash uses a special protocol called RTMP to transmit video data.
+  As such, it is a very direct approach to receiving the video data
+  and it is designed to work better over bad internet connections.
+</p>
+<p>&nbsp;</p>
+<p>
+  Flashless streaming, on the other hand, does a series of web requests
+  fetching segments of the video.  The segments have to be long enough
+  that you can download the next segment while the one you are on is
+  playing.
+</p>
+<p>&nbsp;</p>
+<p>
+  The way Flashless streaming works is, honestly, pretty hacky.  If your
+  connection is too slow or there's network hiccups, it can "stall" and
+  leave you with a blank stream.  Also, because its a series of static
+  videos that you are downloading, there is a built in delay that is
+  difficult to eliminate since these video chunks have to be recorded
+  before they are 'transmitted' to you.
+</p>
+<p>&nbsp;</p>
+<p>
+  We generally recommend Flash as a better viewer experience, but as
+  Flash support for browsers starts to evaporate, we don't really have
+  any other option than to start switching to the inferior Flashless
+  solution.
+</p>
+EOS
+                        )
+    ) ?>
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Proxy Friendly Mode (Tigerdile not working at school or work)',
+                            'dataParent' => 'video',
+                            'body' => <<<EOS
+<p>
+  Proxy Friendly Mode is a way to try and use Tigerdile through a web proxy.
+  Web proxies are pretty common at places of business or schools, though
+  you may also encounter them at other public access spots.
+</p>
+<p>&nbsp;</p>
+<p>
+  It's a little hit or miss.  You may have better luck with the
+  Flashless stream, so you can try Flashless mode on instead and see
+  if that works better for you.  Flashless is also proxy-friendly.
+</p>
+EOS
+            )
+    ) ?>
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Stream Favorites (the stars)',
+                            'dataParent' => 'video',
+                            'body' => <<<EOS
+<p>Clicking on one of the stars next to a stream either on the stream
+   page or on the stream listing will mark that stream as a favorite.
+</p>
+<p>&nbsp;</p>
+<p>You will receive email notifications <strong>if the streamer sends them!</strong>
+   It is up to the streamer to send the message, so, if you never get a mail
+   it could be the person you are favorite-ing hasn't sent any.
+</p>
+<p>&nbsp;</p>
+<p>Please feel free to let streamers know about this feature if they are not
+   using it!
+</p>
+EOS
+            )
+    ) ?>
+</div>
+<div class="row">
+  <div class="col-md-12 content-heading">
+    <h2>Using Chat</h2>
+    <hr />
+  </div>
+</div>
+<div class="panel-group" id="chat" role="tablist" aria-multiselectable="true">
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Popout Chat',
+                            'dataParent' => 'chat',
+                            'body' => <<<EOS
+<p>
+  We recommend the use of popout chat, because generally you will
+  get a better user experience.  To use pop-out chat, click the icon
+  in the upper right corner of the embedded chat.  It is the icon that looks
+  like this:
+  <img src="{$this->basePath('/img/icon-popout.png')}" />
+</p>
+EOS
+                        )
+    ) ?>
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Chat Symbols',
+                            'dataParent' => 'chat',
+                            'body' => <<<EOS
+<p>On the popout chat, there's several symbols you can see on the
+   list of people.  Here's what they mean.
+</p>
+<p>&nbsp;</p>
+<table class="table">
+  <tbody>
+    <tr>
+      <td style="color: blue;">Blue Names</td>
+      <td>Blue names are moderators.</td>
+    </tr>
+    <tr>
+      <td style="color: red;">Red Names</td>
+      <td>Red names are Tigerdile administrators.</td>
+    </tr>
+    <tr>
+      <td><img src="{$this->basePath('/img/icon-silence.jpg')}" /></td>
+      <td>Silence -- if you click this, you will no longer see messages from
+          this user.  It's a passive way to ignore someone.  A dash will
+          show up through their name when you turn this on.  Click it again
+          to turn it off.
+      </td>
+    </tr>
+    <tr>
+      <td><img src="{$this->basePath('/img/icon-popout.png')}" /></td>
+      <td>This launches pop-out chat.  You only see it on the small
+          version of the chat.
+      </td>
+    </tr>
+    <tr>
+      <td><img src="{$this->basePath('/img/icon-kick.png')}" /></td>
+      <td>This kicks the user out of your chat.  It's not really a ban;
+          they can reload the chat page and come right back in.  Use it
+          as a warning if you like.  Only moderators, streamers, and admins
+          see this button.
+      </td>
+    </tr>
+    <tr>
+      <td><img src="{$this->basePath('/img/icon-ban.png')}" /></td>
+      <td>This bans a user from your channel.  A banned user cannot return.
+          You can unban a user by going to the chat settings tab on your
+          stream settings page.  This option is only available to
+          moderators, streamers, and admins.
+      </td>
+    </tr>
+  </tbody>
+</table>
+EOS
+                        )
+    ) ?>
+    <?= $this->partial( 'swaggerdile/index/partial-faq',
+                        array(
+                            'title' => 'Moderators',
+                            'dataParent' => 'chat',
+                            'body' => <<<EOS
+<p>Moderators are like administrators for your own channel. Moderators can
+   ban other users.  You can set moderators by going to the Chat Settings
+   tab on the stream settings page.
+</p>
+EOS
+                        )
+    ) ?>
+</div>

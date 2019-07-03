@@ -1,0 +1,70 @@
+<h1>Tigerdile Adult Content Rules</h1>
+<div class="row">
+  <div class="col-md-8 col-sm-12 col-xs-12">
+    <div class="jumbotron">
+      <p>
+        Tigerdile is a site for content-creators in various mediums
+        to stream (broadcast) their creative process.  Sometimes, that
+        content may be of an adult nature.  It may be of an adult nature
+        due to language, adult situations, drawn or cartoon nudity, or
+        some combination therein.
+      </p>
+      <p>
+        Our streamers can choose to mark their profiles or
+        content as being &quot;adult&quot;, or in other words, not suitable
+        for people of all ages.  This could be for many different
+        reasons, but generally such &quot;adult&quot; content is not suitable
+        for minors and should probably not be considered &quot;Safe For Work.&quot;
+      </p>
+      <p>
+        Please note that all adult materials are works of arts or
+        the result of creative drawing or writing.  We do not host
+        &quot;pornography&quot; featuring &quot;real&quot; participants.
+      </p>
+    </div>
+  </div>
+  <div class="col-md-4 hidden-sm hidden-xs">
+    <img class="img-responsive" src="<?= $this->basePath('img/image-intro.png') ?>" />
+  </div>
+</div>
+<h2>Adult Content Opt-In</h2>
+<div class="row">
+  <div class="col-md-12">
+    <div class="jumbotron">
+      <p>
+        By clicking 'I Am 18 or Over', you are agreeing to the following:
+      </p>
+      <ul>
+        <li>That you are at 18 years of age or older.</li>
+        <li>
+            That you understand you may be exposed to content that
+            may be found offensive, and you waive any right to
+            complain about it.
+        </li>
+        <li>
+            That you are viewing this site from a country or locale
+            where adult material is permitted by law.
+        </li>
+        <li>
+            That you understand Swaggerdile does not make the content
+            on this site, and does not control what our Content
+            Creators may post.  Swaggerdile cannot be held responsible
+            for materials that you find offensive.
+        </li>
+        <li>
+            That you have <strong>Read and Agreed To</strong> our
+            <a href="<?= $this->url('terms') ?>">Terms and Conditions</a>.
+            These terms and conditions include our privacy policy and
+            our refund policy.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<form method="post">
+    <input type="hidden" name="returnUrl" value="<?= htmlentities($returnUrl) ?>" />
+    <p class="text-center">
+        <input class="btn btn-large btn-success" type="submit" name="decline" value="DECLINE Adult Content - Abort" />
+        <input class="btn btn-large btn-success" type="submit" name="accept" value="ACCEPT Adult Content - I Am 18 or Over" />
+    </p>
+</form>

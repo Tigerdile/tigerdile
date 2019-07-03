@@ -1,0 +1,18 @@
+<span class="featherlight-close-icon featherlight-close">X</span>
+<form method="post" action="<?= $this->serverUrl(true) ?>">
+    <input name="return" type="hidden" value="<?= htmlentities($returnUrl) ?>" />
+    <?php
+        $nameList = array();
+    
+        foreach($files as $file):
+            $nameList[] = htmlentities($file->getTitle()); ?>
+        <input name="selectedFiles[]" value="<?= $file->getId() ?>" type="hidden" />
+    <?php endforeach ?>
+    <h3>You're going to delete the following files:</h3>
+    <p><?= implode(', ', $nameList) ?></p>
+    <h3>This is permanent.  Are you sure you want to do this?</h3>
+    <p class="text-center">
+        <input class="btn btn-danger btn-large" type="submit" name="act" value="Delete" />
+        <a class="btn btn-success btn-large featherlight-close">Cancel</a>
+    </p>
+</form>

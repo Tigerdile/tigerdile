@@ -1,0 +1,83 @@
+<?php if(!$authorized) : ?>
+  <div class="jumbotron">
+    <h3 class="text-center">
+      This stream is currently in password-protected mode.  You
+      must provide a valid password in order to proceed.
+    </h3>
+    <form method="post">
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="text" name="password" class="form-control" />
+      </div>
+      <input type="submit" class="btn btn-default" value="Submit" />
+    </form>
+  </div>
+<?php else:
+    $streamBg = \Swaggerdile\Media::getStreamBackground($stream);
+
+    if($streamBg): ?>
+  <style>
+    body {
+        background: url('<?= $streamBg ?>') left top repeat !important;
+    }
+  </style>
+<?php endif ?>
+  <?php if(!$popout): ?>
+<?php /*
+      <div class="panel panel-danger">
+        <div class="panel-heading text-center">
+          Using FireFox?  Can't see the stream?
+          Click here in your URL bar and pick Allow:
+          <img src="<?= $this->basePath('/img/ff-lego-brick.png') ?>" />
+        </div>
+      </div>
+      */
+?>
+    <?php if(!$stream->getIsNsfw()) : ?>
+      <div class="panel panel-danger">
+        <div class="panel-heading text-center">
+          This stream is in SFW mode.  Please be respectful of that.
+          Viewers of all ages may be present.
+        </div>
+      </div>
+    <?php endif ?>
+    <?php if($stream->isStreamExpired()) : ?>
+      <div class="panel panel-danger">
+        <div class="panel-heading text-center">
+          This stream is expired!
+          <?php if(is_object($user) &&
+                   ($stream->getOwnerId() == $user->getId())) : ?>
+            <a href="<?= $this->url('order')?>">Click here to renew!</a>
+          <?php else: ?>
+            If this user is having trouble streaming, let them know about
+            this message!
+          <?php endif ?>
+        </div>
+      </div>
+    <?php endif ?>
+    <div class="row">
+      <?= $stream->getAboveStreamHtml() ?>
+    </div>
+  <?php endif ?>
+  <?php if(array_key_exists('multi', $streamSettings) &&
+           (count($streamSettings['multi']) > 0)) : ?>
+    <?= $this->partial('swaggerdile/stream/partial-multistream.phtml',
+                     array('stream' => $stream,
+                           'settings' => $streamSettings,
+                           'user' => $user,
+                           'popout' => $popout,
+      )) ?>
+  <?php else: ?>
+    <?= $this->partial('swaggerdile/stream/partial-video.phtml',
+                     array('stream' => $stream,
+                           'settings' => $streamSettings,
+                           'user' => $user,
+                           'popout' => $popout,
+      )) ?>
+  <?php endif ?>
+  <?php if(!$popout): ?>
+    <div class="row">
+      <?= $stream->getBelowStreamHtml() ?>
+    </div>
+  <?php endif ?>
+<?php endif ?>

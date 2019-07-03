@@ -1,0 +1,89 @@
+<h1>Tigerdile Mail Composer</h1>
+<?php if(isset($messages) && count($messages)) : ?>
+    <div class="jumbotron">
+        <ul class="text-danger">
+            <?php foreach($messages as $message): ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+<?php endif ?>
+
+<?php if((!$form) && ((!isset($messages)) || (!count($messages)))): ?>
+    <div class="jumbotron text-center">
+        <p>
+            Before you continue, you need to either
+            <a href="<?= $this->url('login')?>?return=<?= urlencode($this->serverUrl(true)) ?>">Log In</a>
+            or
+            <a href="<?= $this->url('signup')?>?return=<?= urlencode($this->serverUrl(true)) ?>">Sign Up</a>
+        </p>
+        <p>
+            This is to help us combat spam.  It's free, easy, and if you
+            already have a login with Tigerdile it will also work here.
+            When you're done, you'll be sent back to this page!
+        </p>
+    </div>
+<?php elseif(is_object($form)):
+    // Set up error attributes
+    $errorClasses = 'bg-danger text-danger no-bullets';
+    $this->getHelperPluginManager()->get('FormElementErrors')
+         ->setAttributes(array('class' => $errorClasses));
+    $form->prepare();
+
+    // Get our email form
+    $emailForm = $form->get('email');
+?>
+<div class="jumbotron">
+<p>
+    <strong>Note:</strong>
+    Mail sent from this mailer will use your registered Swaggerdile
+    email address as the return address.  This is so that your message
+    can be replied to directly rather than through a &quot;notes&quot;
+    interface.
+</p>
+<p>
+    If you need to view or change your Swaggerdile email address, go
+    <a href="<?= $this->url('dashboard-settings') ?>">to your settings page</a>.
+</p>
+</div>
+<div class="jumbotron">
+<form method="post" id="emailForm" role="form">
+  <input type="hidden" name="return" value="<?= htmlentities($return); ?>" />
+  <?php if($sendToCreator): ?>
+    <input type="hidden" name="profileId" value="<?= $creatorProfile->getId() ?>" />
+  <?php endif ?>
+    <div class="form-group">
+        <label for="recipients">Sending to:</label>
+        <?= $this->FormElement($emailForm->get('recipients')); ?>
+        <p><small>
+            <?php
+                $names = array();
+
+                foreach($recipientObjects as $recipient) {
+                    $names[] = $recipient->getDisplayName();
+                }
+
+                echo implode(', ', $names);
+            ?>
+        </small></p>
+    </div>
+    <div class="form-group">
+        <label for="subject"><?= $emailForm->get('subject')->getOption('label') ?></label>
+        <?= $this->formElement($emailForm->get('subject')->setAttribute('class', 'form-control')) ?>
+        <?= $this->formElementErrors($emailForm->get('subject')) ?>
+    </div>
+    <div class="form-group">
+        <label for="message"><?= $emailForm->get('message')->getOption('label') ?></label>
+        <?= $this->formElement($emailForm->get('message')->setAttribute('class', 'form-control')
+                                         ->setAttribute('style', 'min-height: 200px')) ?>
+        <?= $this->formElementErrors($emailForm->get('message')) ?>
+    </div>
+    <div class="form-group">
+        <label for="verify"><?= $emailForm->get('verify')->getLabel() ?></label>
+        <?= $this->formElement($emailForm->get('verify')->setAttribute('class', 'form-control')) ?>
+        <?= $this->formElementErrors($emailForm->get('verify')) ?>
+    </div>
+    <?= $this->formElement($form->get('act')->setAttribute('class', 'btn btn-large btn-success')) ?>
+</form>
+</div>
+<?php endif ?>

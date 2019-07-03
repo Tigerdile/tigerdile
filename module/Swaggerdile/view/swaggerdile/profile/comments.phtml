@@ -1,0 +1,74 @@
+<?php
+    $isOwner = (is_object($user) && 
+               (($user->getId() == $profile->getOwnerId()) ||
+                ($user->isAdmin())));
+
+    /*
+     * Function to recursively output comment HTML.
+     *
+     * @param array of parent content
+     */
+    function recursiveCommentRender($parents, $children, $isOwner, $user, $deleteUrl)
+    {
+        foreach($parents as $parent) : ?>
+    <li class="well">
+        <p>
+            Comment on <?= date('Y-m-d H:i:s', strtotime($parent->getCreated())) ?> by <span class="comment-author"><?= $parent->getDisplayName() ?></span>
+            (<a href="#commentForm" class="comment-reply" id="<?= $parent->getId()?>-comment-add">Reply</a>)
+            <?php if($isOwner || (is_object($user) && ($parent->getAuthorId() == $user->getId()))) : ?>
+                (<a href="<?= $deleteUrl ?>?delete=<?=$parent->getId() ?>" class="comment-delete" id="<?= $parent->getId()?>-comment-delete">Delete</a>)
+            <?php endif ?>
+        </p>
+        <?= htmlentities($parent->getContent()) ?>
+    </li>
+        <?php if(array_key_exists($parent->getId(), $children)) : ?>
+            <li>
+                <ul>
+                    <?php recursiveCommentRender($children[$parent->getId()], $children, $isOwner, $user, $deleteUrl) ?>
+                </ul>
+            </li>
+        <?php endif ?>
+        <?php endforeach;
+    }
+?>
+<h3>Comments</h3>
+
+<?php if(count($parentComments)) : ?>
+    <ul class="no-bullets">
+        <?php recursiveCommentRender($parentComments, $childCommentsByParent, $isOwner, $user, $this->url('profile-add-comment', array('profile' => $profile->getUrl(), 'activity' => $content->getId()))) ?>
+    </ul>
+    <h3>New Comment</h3>
+<?php else : ?>
+    <h3>None yet!  Be the first!</h3>
+<?php endif ?>
+<?php
+    $form->prepare();
+?>
+<a name="commentForm"></a>
+<form method="post" id="commentsForm" action="<?= $this->url('profile-add-comment', array('profile' => $profile->getUrl(), 'activity' => $content->getId())) ?>" />
+    <?= $this->formElement($form->get('parentId')) ?>
+    <div class="form-group" id="comment-reply-info" style="display: none;"></div>
+    <div class="form-group">
+        <?= $this->formElement($form->get('content')->setAttribute('class', 'form-control')) ?>
+        <?= $this->FormElementErrors($form->get('content')) ?>
+    </div>
+    <input type="submit" name="act" class="btn btn-success btn-lg" value="New Comment" />
+</form>
+<?php
+    $this->inlineScript()->captureStart() ?>
+
+    jQuery(document).ready(function() {
+        jQuery('a.comment-delete').click(function() {
+            return confirm('Are you sure you want to delete this comment?  Click OK to continue.');
+        });
+
+        jQuery('a.comment-reply').click(function() {
+            var commentId = parseInt(this.id);
+
+            jQuery('input[name="parentId"]').val(commentId);
+
+            jQuery('#comment-reply-info').text('Replying to: ' + jQuery(this).siblings('.comment-author').text());
+            jQuery('#comment-reply-info').show();
+        });
+    });
+<?php $this->inlineScript()->captureEnd() ?>

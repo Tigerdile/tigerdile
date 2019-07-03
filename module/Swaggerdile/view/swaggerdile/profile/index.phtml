@@ -1,0 +1,448 @@
+<?php
+// For bar indicator
+$this->headLink()->appendStylesheet($this->basePath('css/bi-style.css'));
+$this->headScript()->appendFile($this->basePath('js/jquery.easing.1.3.js'))
+                   ->appendFile($this->basePath('js/jquery-barIndicator.js'));
+
+// Set up error attributes
+$errorClasses = 'bg-danger text-danger no-bullets';
+$this->getHelperPluginManager()->get('FormElementErrors')
+     ->setAttributes(array('class' => $errorClasses));
+
+// If we don't have a profile, then error.
+if(!is_object($profile)) : ?>
+<div class="jumbotron text-center">
+  <p>Whoops!  We couldn't find the profile you're looking for.</p>
+  <p>Please use our search feature in the header to look for a specific
+     profile, or click Browse to look around.</p>
+  <p>It's also possible that the owner of this profile has opted to
+     shut it down for some reason, or they could have changed their
+     URL.</p>
+  <p>If you're absolutely sure you have the URL right, click our Support
+     link in the menu and ask us.  We're happy to help!</p>
+</div>
+<?php else:
+    // Are we editing?
+    $editMode = is_object($form);
+    $profileForm = false;
+
+    if($editMode) :
+        $form->prepare();
+
+        // Grab our profile form
+        $profileForm = $form->get('profile');
+    ?>
+    <form enctype="multipart/form-data" method="post" id="editProfileForm" action="<?= $this->url('profiles', array('profile' => $profile->getUrl(), 'activity' => 'edit')) ?>" role="form" />
+    <?php endif ?>
+<?php if($editMode && count($form->getMessages())): ?>
+    <h2 class="text-center text-danger">There's some problems!  Look for the red to fix 'em.</h2>
+<?php endif ?>
+
+<?php if(!$editMode): ?>
+    <div class="row">
+        <h1 class="text-center">
+            <?= htmlentities($profile->getTitle()) ?>
+        </h1>
+        <?php
+            if($profile->getPatreonClientId() && ((!is_object($user)) || (!$user->getPatreonId()))) : ?>
+            <div class="panel panel-default">
+                <div class="panel-body bg-success text-center">
+                    <a href="<?= $this->url('patreon') ?>?return=<?= urlencode($profile->getUrl()) ?>">
+                    Follow this profile on Patreon?  You can link your
+                    Patreon account and your Swaggerdile account
+                    by clicking here!  Access their Swaggerdile content!
+                    </a>
+                </div>
+            </div>
+        <?php endif ?>
+        <?php if($profile->getIsHiatus()): ?>
+            <div class="panel panel-default">
+                <div class="panel-body bg-info text-center">
+                    <p>This profile is in hiatus mode.  That means, if you are
+                       a subscriber, you will not be billed until hiatus mode
+                       has been turned off.
+                    </p>
+                </div>
+            </div>
+        <?php endif ?>
+    </div>
+<?php endif ?>
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/profile/partial-profile-menu.phtml',
+                                array('isOwner' => $isOwner, 'editMode' => $editMode,
+                                      'profile' => $profile, 'user' => $user,
+                                      'subscriberTier' => $subscriberTier));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <?php if($editMode): ?>
+            <div class="col-md-12 panel">
+                <?php if(!$profile->getPatreonAccessToken()) : ?>
+                    <p><strong>Have a Patreon?  Click
+                       <a href="<?= $this->url('profile-patreon', array('profile' => $profile->getUrl())) ?>">here</a>
+                       to link it!</strong>
+                       When you link your Patreon account, you can import your Patreon 
+                       settings (profile and reward info) and let your Patreon users
+                       have access to your Swaggerdile profile!
+                    </p>
+                <?php else: ?>
+                    <p><strong>You've linked your Patreon to your Swaggerdile profile.
+                       Click
+                       <a href="<?= $this->url('profile-patreon', array('profile' => $profile->getUrl())) ?>">here</a>
+                       to manage the link settings.
+                    </p>
+                <?php endif ?>
+            </div>
+            <div class="col-md-12 panel">
+                <p>
+                    Need help getting set up?  We've got a helpful video!  <a href="https://www.youtube.com/watch?v=8TiSicireCg" target="_blank">Click here!</a>
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="title"><?= $profileForm->get('title')->getLabel() ?></label>
+                <?= $this->FormElement($profileForm->get('title')->setAttribute('class', 'form-control')) ?>
+                <?= $this->FormElementErrors($profileForm->get('title')); ?>
+            </div>
+        <?php endif?>
+
+        <?php if($editMode) : ?>
+            <label for="content">Describe Your Project</label>
+			<div class="btn-toolbar editor-small" data-role="userContent-toolbar"
+				data-target="#userContent">
+				<div class="btn-group">
+					<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>
+					<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>
+					<a class="btn btn-default" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a>
+					<a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>
+					<a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>
+					<a class="btn btn-default" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>
+					<a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent"></i></a>
+					<a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a>
+					<a class="btn btn-default" data-edit="format-h1">h1</a>
+					<a class="btn btn-default" data-edit="format-h2">h2</a>
+					<a class="btn btn-default" data-edit="format-h3">h3</a>
+					<a class="btn btn-default" data-edit="format-h4">h4</a>
+					<a class="btn btn-default" data-edit="format-h5">h5</a>
+					<a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>
+					<a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>
+					<a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>
+					<a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>
+                </div>
+                <div class="btn-group">
+					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Select text, then use this to make a link"><i class="fa fa-link"></i></a>
+					<div class="dropdown-menu input-append">
+						<input placeholder="URL" type="text" data-edit="createLink" />
+						<button class="btn" type="button">Add</button>
+					</div>
+					<a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-unlink"></i></a>
+					<a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a>
+					<a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a>
+                    <div class="btn-group">
+                        <a id="pictureBtn" title="" class="btn btn-default" data-original-title="Insert picture (or just drag &amp; drop)">
+                            <i class="fa fa-picture-o"></i>
+                        </a>
+                        <input class="imgUpload" type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 39px; height: 30px;" />
+                    </div>
+				</div>
+			</div>
+            <?= $this->formElement($profileForm->get('content')->setAttribute('id', 'content')); ?>
+        <?php endif ?>
+        <div id="userContent" class="<?= $editMode ? 'wysiwyg-box' : '' ?>">
+            <?= $editMode ? $profileForm->get('content')->getValue() : $profile->getContent() ?>
+        </div>
+        <?php
+            if($editMode) {
+                echo $this->FormElementErrors($profileForm->get('content'));
+            }
+
+        if($editMode) :
+            // This stuff only shows up if we're editing
+            ?>
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">The following fields you only see while you are editing your
+                       page.  If you need help or have any questions at all, please
+                       <u><a href="https://www.tigerdile.com/support" target="_blank">contact support</a></u>
+                        -- we're here to help!
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="paymentTypeId"><?= $profileForm->get('paymentTypeId')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('paymentTypeId')->setAttribute('class', 'form-control')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('paymentTypeId')) ?>
+                        <a href="#" onclick="jQuery('.payment-explanation').toggle(); return false;">What's this?  Click for explanation...</a>
+                        <div class="payment-explanation" style="display:none;">
+                            <h3>What does this do?</h3>
+                            <p>
+                                This controls how and when your customers are charged, and this
+                                option gives you some flexibility with regards to how you run things.
+                                Please check out our "Historical Fee" feature below as well for even
+                                more flexibility!
+                            </p>
+                            <h3>Monthly: Prorated Up Front Payment Required</h3>
+                            <p>This is the default, recommended payment method
+                               because it affords you protection against people
+                               that sign up, view your content, but cancel before
+                               paying as is rampant on similar sites.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>This option, basically, turns Swaggerdile into a "paywall" for
+                               your content.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>Swaggerdile charges your subscribers the full amount of their
+                               pledge at the first of the month on a recurring basis.  When
+                               a new subscriber joins, they pay for a partial month -- a
+                               prorated amount with a minimum of $1.00.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>This means, if a subscriber pledges $30.00 and they join when
+                               there are just 10 days left in the month, they will pay a prorated
+                               amount of $10.00.  When we charge them on the first of the
+                               month, they will pay the full pledged amount.  This ensures
+                               that you are paid fairly for your work and, in combination with
+                               our Historical Fee feature, ensures that people only see what they
+                               have paid to see.
+                            </p>
+                            <h3>Monthly: No Up-Front Payment</h3>
+                            <p>If you prefer, this is an option that
+                               is similar to what other sites similar to Swaggerdile offer.
+                               Your customer will be charged the full amount of their pledge
+                               at the first of the month but will not be required to pay
+                               anything when they first sign up.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>Bear in mind, they will have access to any content you post
+                               once they have signed up.  Therefore, this method leaves
+                               you less protected from thieves and is only recommended
+                               if you are producing content that is freely available
+                               and asking for donations rather than using Swaggerdile
+                               as a paywall.
+                            </p>
+                            <h3>Monthly: Full Up-Front Payment Required, Full First Month Payment</h3>
+                            <p>This option
+                               will charge your subscriber the full amount of money, and then it will
+                               charge them the full amount of money again on the first of the month.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>So, if someone joins on the last day of the month, then they will immediately
+                               be charged full price again the next day.  In some cases, this may be a
+                               fair way to charge.  It is up to you and what you think your customers
+                               will tolerate.
+                            </p>
+                            <h3>Monthly: Full Up-Front Payment Required, Skip First Month Payment</h3>
+                            <p>An option that
+                               will charge your subscriber the full amount of money, but it will NOT
+                               charge them anything the first time billing occurs.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p>So, if someone joins in April, they will pay the full subscription price
+                               right away.  They will <strong>not</strong> pay in May, but they will
+                               be charged again in June and going forward from that point.
+                            </p>
+                            <p>
+                                <a href="#" onclick="jQuery('.payment-explanation').hide(); return false;">Close Explanation</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="url"><?= $profileForm->get('url')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('url')->setAttribute('class', 'form-control')) ?>
+                        <?php if($urlFailure) : ?>
+                            <ul class="<?= $errorClasses ?>">
+                                <li>That URL is already in use.  Please try another.</li>
+                            </ul>
+                        <?php elseif(strlen($this->FormElementErrors($profileForm->get('url')))) : ?>
+                          <ul class="<?= $errorClasses ?>">
+                            <li>The URL must only contain letters, numbers, and dashes (-).  Do not
+                                include https://www.swaggerdile.com in your URL -- that part we've
+                                got covered.  We only need the last bit that is your unique profile URL.</li>
+                          </ul>
+                        <?php endif ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="historicalFee">
+                            <?= $profileForm->get('historicalFee')->getOption('label') ?>
+                            <a target="_blank" href="<?= $this->url('pricing') ?>#historicalFee">Click here for more information.</a></label>
+                        <?= $this->formElement($profileForm->get('historicalFee')->setAttribute('class', 'form-control')) ?>
+                        <?php if(strlen($this->FormElementErrors($profileForm->get('historicalFee')))) : ?>
+                          <ul class="<?= $errorClasses ?>">
+                            <li>This must be a valid dollar amount without extra symbols (for example, 10.00)</li>
+                          </ul>
+                        <?php endif ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="isNsfw"><?= $profileForm->get('isNsfw')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('isNsfw')->setAttribute('class', 'form-control')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('isNsfw')) ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="isVisible"><?= $profileForm->get('isVisible')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('isVisible')->setAttribute('class', 'form-control')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('isVisible')) ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="isHiatus"><?= $profileForm->get('isHiatus')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('isHiatus')->setAttribute('class', 'form-control')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('isHiatus')) ?>
+                    </div>
+                    <div class="form-group">
+                        <?php
+                            $mediaFile = \Swaggerdile\Media::getProfileIcon($profile);
+
+                            if($mediaFile) : ?>
+                            <img src="<?= $mediaFile ?>" width="280" height="200" />
+                        <?php endif ?>
+                        <label for="profileIcon"><?= $profileForm->get('profileIcon')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('profileIcon')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('profileIcon')) ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="useWatermark"><?= $profileForm->get('useWatermark')->getOption('label') ?></label>
+                        <?= $this->formElement($profileForm->get('useWatermark')->setAttribute('class', 'form-control')) ?>
+                        <?= $this->FormElementErrors($profileForm->get('useWatermark')) ?>
+                        <a href="#" onclick="jQuery('.watermark-explanation').toggle(); return false;">What's this?  Click for explanation...</a>
+                        <div class="watermark-explanation" style="display:none;">
+                            <h3>Caveat: This only works for JPEG, GIF, and PNG images!</h3>
+                            <h3>What does this do?</h3>
+                            <p>
+                                Swaggerdile's automatic watermark feature will
+                                watermark each picture viewed at full size by your
+                                users with a unique code that can identify the
+                                user.  That way, if the full size image is pirated,
+                                the watermark can be used to figure out exactly
+                                who did the pirating.
+                            </p>
+                            <p>
+                                <strong>Swaggerdile embeds invisible information in ALL JPEG, GIF, and PNG
+                                        images that can be used to track who leaks your images.  So
+                                        even if you pick 'No' watermarking, you still have some
+                                        protection!
+                                </strong>
+                            </p>
+                            <h3>What are the different kinds of watermarks?</h3>
+                            <ul>
+                                <li>
+                                    <p>
+                                        <strong>DireTracks Stealth Watermarks</strong> are a unique form
+                                        of watermark, where the image is altered to
+                                        be unique for each viewer.  The alteration is
+                                        done by minorly tweaking the colors of the image.
+                                        If you find a pirated image, Swaggerdile can
+                                        attempt to decode who originally downloaded it.
+                                    </p>
+                                    <p>
+                                        Please note, that if a user alters the image or
+                                        changes the file format, it will probably break
+                                        the hidden watermark.  This relies on the
+                                        potential pirate not being aware of the watermark,
+                                        and therefore it is critical that this remain
+                                        as secret as possible.  We do not advertise
+                                        this feature, but it's a particularly cool
+                                        one and we hope you will help us keep it
+                                        secret.
+                                    </p>
+                                </li>
+                                <li>
+                                    <p>
+                                        An <strong>unobtrusive watermark</strong> will make a watermark
+                                        along the edge of hte image.  It will look
+                                        like a timestamp and hopefully not arouse
+                                        much suspicion.
+                                    </p>
+                                </li>
+                                <li>
+                                    <p>
+                                        An <strong>obtrusive watermark</strong> will actually watermark
+                                        across the center of the image.  We don't
+                                        recommend the use of this one, but it's here
+                                        if you want it.
+                                    </p>
+                                </li>
+                            </ul>
+                            <p>
+                                In all cases, a stolen image can be given
+                                to the Swaggerdile staff and we will do
+                                our forensic analysis on it and try to
+                                determine who stole it.  Simply mail the image to
+                                <a href="mailto:support@tigerdile.com">support@tigerdile.com</a>!
+                            </p>
+                            <p>
+                                <a href="#" onclick="jQuery('.watermark-explanation').hide(); return false;">Close Explanation</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="submit" name="act" class="btn btn-success btn-lg" value="Save Changes" />
+        <?php endif ?>
+    </div>
+</div>
+<?php if($editMode) : ?>
+    </form>
+    <?php 
+    $this->inlineScript()->appendFile('/js/jquery.hotkeys.js')
+                         ->appendFile('/js/bootstrap-wysiwyg.min.js')
+                         ->captureStart(); ?>
+    function addImageClass(ev) {
+        jQuery(this).find('img').addClass('img-responsive');
+    }
+
+    jQuery(document).ready(function() {
+        jQuery('#userContent').wysiwyg({
+            'toolbarSelector': '[data-role=userContent-toolbar]',
+            'form' : {
+                'text-field' : 'content',
+                'separate-binary' : false,
+            }
+        });
+
+        jQuery('#userContent').on('image-inserted', addImageClass);
+
+        jQuery('form#editProfileForm').submit(function() {
+            jQuery('input#content').val(jQuery('#userContent').cleanHtml(true));
+
+            <?php foreach($tierContentFields as $tierContent) : ?>
+                jQuery('input#<?= $tierContent ?>').val(jQuery('#<?= $tierContent ?>-div').cleanHtml(true));
+            <?php endforeach ?>
+
+            <?php foreach($milestoneContentFields as $milestoneContent) : ?>
+                jQuery('input#<?= $milestoneContent ?>').val(jQuery('#<?= $milestoneContent ?>-div').cleanHtml(true));
+            <?php endforeach ?>
+
+            return true;
+        });
+        
+        <?php foreach($tierContentFields as $tierContent) : ?>
+            jQuery('#<?= $tierContent ?>-div').wysiwyg({
+                'toolbarSelector': '[data-role=<?= $tierContent ?>-div-toolbar]',
+                'form' : {
+                    'text-field' : '<?= $tierContent ?>',
+                    'separate-binary' : false,
+                }
+            });
+
+            jQuery('#<?= $tierContent ?>-div').on('image-inserted', addImageClass);
+        <?php endforeach ?>
+
+        <?php foreach($milestoneContentFields as $milestoneContent) : ?>
+            jQuery('#<?= $milestoneContent ?>-div').wysiwyg({
+                'toolbarSelector': '[data-role=<?= $milestoneContent ?>-div-toolbar]',
+                'form' : {
+                    'text-field' : '<?= $milestoneContent ?>',
+                    'separate-binary' : false,
+                }
+            });
+
+            jQuery('#<?= $milestoneContent ?>-div').on('image-inserted', addImageClass);
+        <?php endforeach ?>
+    });
+    
+    <?php $this->inlineScript()->captureEnd();
+    
+    endif;
+endif;

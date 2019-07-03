@@ -1,0 +1,146 @@
+<div class="row">
+    <div class="col-md-3" id="profile-sidebar">
+        <?php
+            echo $this->partial('swaggerdile/profile/partial-profile-menu.phtml',
+                                array('isOwner' => $isOwner, 'editMode' => 0,
+                                      'profile' => $profile,
+                                      'subscriberTier' => $subscriberTier,
+                                      'user' => $user
+                                ));
+        ?>
+    </div>
+    <div class="col-md-9">
+        <?php
+            // Display not in tiers if we have 'em
+            if(count($tierlessSubscribers)) : ?>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <input type="checkbox" name="tier-toggle" />
+                        Users who pay, but are not in a tier
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>&nbsp</th>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Pledge Amount</th>
+                                <th>Total Paid to Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($tierlessSubscribers as $subscriber): ?>
+                                <tr>
+                                    <td><input type="checkbox" name="userId" value="<?= $subscriber->getUserId() ?>" /></td>
+                                    <td><?= $subscriber->getDisplayName() ?></td>
+                                    <td><?= $subscriber->getUserEmail() ?></td>
+                                    <td>$<?= number_format($subscriber->getPayment(), 2) ?></td>
+                                    <td>
+                                        <?php if($subscriber->getIsPatreon()): ?>
+                                            Patreon
+                                        <?php else: ?>
+                                            $<?= number_format($subscriber->getTotalPaid(), 2) ?>
+                                        <?php endif ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif;
+
+            $curTier = 0;
+
+            foreach($subscribers as $subscriber) : ?>
+                <?php if($subscriber->getId() != $curTier) : ?>
+                    <?php if($curTier) : ?></tbody></table></div><?php endif ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <input type="checkbox" name="tier-toggle" />
+                                <?= htmlentities($subscriber->getTitle()) ?>
+                            </h3>
+                        </div>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>&nbsp</th>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Pledge Amount</th>
+                                        <th>Total Paid to Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                <?php
+                    $curTier = $subscriber->getId();
+                    endif;
+                ?>
+                                <tr>
+                                    <td><input type="checkbox" name="userId" value="<?= $subscriber->getUserId() ?>" /></td>
+                                    <td><?= $subscriber->getDisplayName() ?></td>
+                                    <td><?= $subscriber->getUserEmail() ?></td>
+                                    <td>$<?= number_format($subscriber->getPayment(), 2) ?></td>
+                                    <td>
+                                        <?php if($subscriber->getIsPatreon()): ?>
+                                            Patreon
+                                        <?php else: ?>
+                                            $<?= number_format($subscriber->getTotalPaid(), 2) ?>
+                                        <?php endif ?>
+                                    </td>
+                                </tr>
+        <?php endforeach ?>
+        <?php if(count($subscribers)) : ?>
+            </tbody></table></div>
+        <?php endif ?>
+        <br />
+        <br />
+        <p class="text-center">
+            <input class="btn btn-lrg btn-success" type="button" name="select-all" value="Select All" />
+            <input class="btn btn-lrg btn-success" type="button" name="select-none" value="Select None" />
+            <input class="btn btn-lrg btn-success" type="button" name="select-email" value="Send Email" />
+        </p> 
+    </div>
+</div>
+<?php $this->inlineScript()->captureStart() ?>
+    jQuery('input[name="select-all"]').click(function() {
+        jQuery('input[name="userId"]').prop('checked', true);
+        return false;
+    });
+
+    jQuery('input[name="select-none"]').click(function() {
+        jQuery('input[name="userId"]').prop('checked', false);
+        return false;
+    });
+
+    jQuery('input[name="tier-toggle"]').click(function() {
+        jQuery(this).parent().parent().parent()
+                    .find('input[name="userId"]').prop('checked', this.checked);
+        return true;
+    });
+
+    jQuery('input[name="userId"]').click(function() {
+        jQuery('input[name="tier-toggle"]').prop('checked', false);
+    });
+
+    jQuery('input[name="select-email"]').click(function() {
+        var toSend = [];
+
+        jQuery('input[name="userId"]:checked').each(function() {
+            toSend.push(this.value);
+        });
+
+        if(!toSend.length) {
+            alert('You must select at least one user to email.');
+        } else {
+            jQuery('body').append('<form id="sendmail" action="<?= $this->url('email') ?>" method="post"><input type="hidden" name="recipients" value="' + toSend.join(',') + '" /><input type="hidden" name="return" value="<?= htmlentities($this->serverUrl(true)) ?>" /></form>');
+            jQuery('#sendmail').submit();
+        }
+
+        return false;
+    });
+<?php $this->inlineScript()->captureEnd() ?>

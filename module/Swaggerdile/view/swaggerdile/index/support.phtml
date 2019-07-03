@@ -1,0 +1,67 @@
+<div class="col-md-12 content-heading">
+  <h1>Support Request</h1>
+  <hr />
+</div>
+<?php if(!$done) : ?>
+  <div class="col-md-12">
+    <h5 class="text-center">
+      No issue is too small!  Tigerdile wants to hear your questions,
+      concerns, and suggestions!
+    </h5>
+    <h5 class="text-center">
+      You can also email us directly at support AT tigerdile DOT com
+    </h5>
+  </div>
+  <div class="col-md-9 col-sm-12 col-xs-12">
+    <div class="jumbotron">
+      <h5 class="text-center">
+        Tigerdile is an East Coast monster and usually responds between 10 AM and midnight
+        Eastern US time.  During Tigerdile's waking period, we try to respond within an
+        hour.  We will definitely get back to you within 24 hours though!
+      </h5>
+<?php
+    $form = $this->form;
+    $form->prepare();
+
+    // Configure form
+    $form->setAttribute('action', $this->url('support'));
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('role', 'form');
+
+    echo $this->form()->openTag($form);
+?>
+        <div class="form-group">
+            <label for="username"><?= $form->get('name')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('name')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('name')); ?>
+        </div>
+        <div class="form-group">
+            <label for="email"><?= $form->get('email')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('email')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('email')); ?>
+        </div>
+        <div class="form-group">
+            <label for="password"><?= $form->get('message')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('message')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('message')); ?>
+        </div>
+        <div class="form-group">
+            <label for="verify"><?= $form->get('verify')->getOption('label') ?></label>
+            <?= $this->formElement($form->get('verify')->setAttribute('class', 'form-control')) ?>
+            <?= $this->FormElementErrors($form->get('verify')) ?>
+        </div>
+        <?= $this->formElement($form->get('act')->setAttribute('class', 'btn btn-default')) ?>
+
+        <?= $this->form()->closeTag() ?>
+    </div>
+  </div>
+  <div class="col-md-3 hidden-sm hidden-xs">
+    <img class="img-responsive" src="<?= $this->basePath('img/tigerdile-sexy.jpg') ?>" />
+  </div>
+<?php else: ?>
+  <div class="col-md-12">
+    <div class="jumbotron">
+      <h3>Got it!  We'll get back to you soon.</h3>
+    </div>
+  </div>
+<?php endif ?>
