@@ -3,9 +3,9 @@ Tigerdile Web Site
 
 Introduction
 ------------
-This is the code for Tigerdile's website.  This doesn't include the chat server, video authorization server, API server, or preview server which are a separate piece written in Python.
+This is the code for Tigerdile's website.  This doesn't include the chat server, video authorization server, API server, or preview server which are separate pieces written in Python.
 
-Being just the front end, it uses PHP with Zend Framework 2 ridigng on a MySQL database.  This document will attempt to guide you through setting up and developing; please note that this USED to be a WordPress based site, and so there's a lot of legacy WordPress crap still around that I am not terribly proud of.
+Being just the front end, it uses PHP with Zend Framework 2 riding on a MySQL database.  This document will attempt to guide you through setting up and developing; please note that this USED to be a WordPress based site, and so there's a lot of legacy WordPress crap still around that I am not terribly proud of.
 
 What Is Swaggerdile?
 --------------------
@@ -84,3 +84,14 @@ I've tried to follow the Zend Framework coding stanards.  It is, in particular, 
 I do not believe in self commenting code.  That's a lie that lazy developers tell themselves.  If some of my code isn't well commented, it's because I was hacking away at it at 1 AM trying to get something broken to work after working a 10 hour day as a developer.  I'll confess I've sometimes been lazy and I'll tell you, I'm really not proud of this code base.  But going forward, I really want only clean, well documented code if possible.
 
 Please don't judge me too harshly by this body of work.  As always, I could totally do better were I to do it over.  But, that is unlikely to happen :)
+
+
+Application Map
+---------------
+TODO: If there's actually anyone interested in working on this project, I will add a map that shows where the code is an how it is structured.
+
+DB Model
+--------
+TODO: Also, if there's actual people interested in this, I'll do a model map of the database.
+
+Feel free to express interest in the form of opening tickets for me to do these things :)  I'll assume if I get no tickets, nobody's even reading this!
