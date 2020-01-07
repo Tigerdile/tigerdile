@@ -19,6 +19,8 @@
  * By: Tigerdile, LLC
  */
 
+ff_error_shown = false;
+
 var tdvideo = {
     detectMobile: function() {
         /* This is from http://detectmobilebrowsers.com/
@@ -111,7 +113,10 @@ var tdvideo = {
                     return;
                 }
 
-                alert("There was an error while loading the video.  Reload the page and try again.  If this error continues, inform support@tigerdile.com - error code:" + e);
+                //setTimeout(1000, function() {
+                    tdvideo.loadVideo(id, flvjs_url, rtmp_url, hls_url, volume,
+                                      autoplay);
+                //});
             });
 
             flvPlayer.on(flvjs.Events.LOADING_COMPLETE, function(){
@@ -128,7 +133,19 @@ var tdvideo = {
 
             // Start playing
             if(autoplay) {
-                flvPlayer.play();
+                var promise = flvPlayer.play();
+                //flvPlayer.play();
+
+                if (promise !== undefined) {
+                    promise.then(_ => {
+                        // Autoplay started!
+                    }).catch(error => {
+                        if (!ff_error_shown) {
+                            alert("Firefox (and other browsers) now block autoplay of video.  If you click the spot next to your URL that has a little green lock box and a few other icons, you can give Tigerdile permission to autoplay.  Otherwise, you'll need to click the play button on the video itself.  Sorry!");
+                            ff_error_shown = true;
+                        }
+                    });
+                }
             }
 
             return flvPlayer;

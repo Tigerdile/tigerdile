@@ -20,7 +20,7 @@
     echo $this->form()->openTag($form);
 ?>
     <?php if($returnUrl) : ?>
-        <input type="hidden" name="return" value="<?= $returnUrl ?>" />
+        <input type="hidden" name="return" value="<?= htmlentities($returnUrl) ?>" />
     <?php endif ?>
 
     <div class="form-group">
